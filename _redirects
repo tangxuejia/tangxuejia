@@ -1,0 +1,6 @@
+/calculators/:tool  /calculator.html?tool=:tool  200
+/about.html  /info.html  200
+/methodology.html  /info.html  200
+/privacy.html  /info.html  200
+/terms.html  /info.html  200
+/contact.html  /info.html  200
