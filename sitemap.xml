@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://renometric.netlify.app/</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/concrete</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/paint</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/tile</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/flooring</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/gravel</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/mulch</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/roofing</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/deck</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/fence</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/squarefeet</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/concrete-volume-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/concrete-cost-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/cement-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/brick-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/asphalt-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/concrete-weight-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/concrete-bag-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/concrete-slab-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/concrete-footing-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/renovation-cost-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/kitchen-remodel-cost-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/bathroom-remodel-cost-calculator</loc></url>
-<url><loc>https://renometric.netlify.app/calculators/home-improvement-cost-calculator</loc></url>
+  <url><loc>https://renometric.netlify.app/</loc></url>
+  <url><loc>https://renometric.netlify.app/methodology.html</loc></url>
+  <url><loc>https://renometric.netlify.app/about.html</loc></url>
+  <url><loc>https://renometric.netlify.app/privacy.html</loc></url>
+  <url><loc>https://renometric.netlify.app/terms.html</loc></url>
+  <url><loc>https://renometric.netlify.app/contact.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/concrete</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/paint</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/tile</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/flooring</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/gravel</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/mulch</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/roofing</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/deck</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/fence</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/squarefeet</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/concrete-volume-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/cement-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/brick-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/block-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/asphalt-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/sand-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/rebar-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/concrete-cost-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/renovation-cost-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/home-improvement-cost-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/kitchen-remodel-cost-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/bathroom-remodel-cost-calculator.html</loc></url>
+  <url><loc>https://renometric.netlify.app/calculators/concrete-driveway-calculator.html</loc></url>
 </urlset>
