@@ -10,9 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "_site"
-CLOUDFLARE = bool(os.environ.get("CF_PAGES"))
-BASE = "" if CLOUDFLARE else "/tangxuejia"
-ORIGIN = "https://renometric.pages.dev" if CLOUDFLARE else "https://tangxuejia.github.io/tangxuejia"
+BASE = os.environ.get("RENOMETRIC_BASE", "")
+ORIGIN = os.environ.get("RENOMETRIC_ORIGIN", "https://renometric.pages.dev")
 
 if OUT.exists():
     shutil.rmtree(OUT)
