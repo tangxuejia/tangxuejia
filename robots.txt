@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://renometric.netlify.app/sitemap.xml
+Sitemap: https://tangxuejia.github.io/tangxuejia/sitemap.xml
