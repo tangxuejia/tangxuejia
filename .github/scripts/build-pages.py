@@ -34,10 +34,10 @@ for item in ROOT.iterdir():
 for page_path in OUT.rglob("*.html"):
     text = page_path.read_text(encoding="utf-8")
     text = text.replace("https://renometric.netlify.app", ORIGIN)
-    text = text.replace('href="/', f'href="{BASE}/')
-    text = text.replace("href='/", f"href='{BASE}/")
-    text = text.replace('src="/', f'src="{BASE}/')
-    text = text.replace("src='/", f"src='{BASE}/")
+    text = re.sub(r'href="/(?!tangxuejia/)', f'href="{BASE}/', text)
+    text = re.sub(r"href='/((?!tangxuejia/))", f"href='{BASE}/", text)
+    text = re.sub(r'src="/(?!tangxuejia/)', f'src="{BASE}/', text)
+    text = re.sub(r"src='/((?!tangxuejia/))", f"src='{BASE}/", text)
     text = text.replace(
         '<form name="contact" method="POST"',
         '<form name="contact" method="POST" onsubmit="event.preventDefault();alert(\'Contact form is temporarily unavailable while RenoMetric is on its free preview host.\');"',
