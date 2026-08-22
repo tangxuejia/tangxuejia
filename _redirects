@@ -1,6 +1,11 @@
-/calculators/:tool  /calculator.html?tool=:tool  200
-/about.html  /info.html  200
-/methodology.html  /info.html  200
-/privacy.html  /info.html  200
-/terms.html  /info.html  200
-/contact.html  /info.html  200
+/calculators/concrete  /calculators/concrete.html  200
+/calculators/paint  /calculators/paint.html  200
+/calculators/tile  /calculators/tile.html  200
+/calculators/flooring  /calculators/flooring.html  200
+/calculators/gravel  /calculators/gravel.html  200
+/calculators/mulch  /calculators/mulch.html  200
+/calculators/roofing  /calculators/roofing.html  200
+/calculators/deck  /calculators/deck.html  200
+/calculators/fence  /calculators/fence.html  200
+/calculators/squarefeet  /calculators/squarefeet.html  200
+/calculators  /#calculators  301
