@@ -3,14 +3,16 @@ from __future__ import annotations
 import html
 import importlib.util
 import json
+import os
 import re
 import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "_site"
-BASE = "/tangxuejia"
-ORIGIN = "https://tangxuejia.github.io/tangxuejia"
+CLOUDFLARE = bool(os.environ.get("CF_PAGES"))
+BASE = "" if CLOUDFLARE else "/tangxuejia"
+ORIGIN = "https://renometric.pages.dev" if CLOUDFLARE else "https://tangxuejia.github.io/tangxuejia"
 
 if OUT.exists():
     shutil.rmtree(OUT)
