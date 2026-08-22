@@ -30,6 +30,7 @@ for item in ROOT.iterdir():
 
 (OUT / ".nojekyll").write_text("", encoding="utf-8")
 
+# Adapt host-neutral source paths to the current GitHub Pages project path.
 for page_path in OUT.rglob("*.html"):
     text = page_path.read_text(encoding="utf-8")
     text = text.replace("https://renometric.netlify.app", ORIGIN)
@@ -56,18 +57,21 @@ for name in ("robots.txt", "sitemap.xml"):
     if p.exists():
         p.write_text(p.read_text(encoding="utf-8").replace("https://renometric.netlify.app", ORIGIN), encoding="utf-8")
 
-calc_dir = OUT / "calculators"
-calc_dir.mkdir(exist_ok=True)
-
 scripts_dir = ROOT / ".github" / "scripts"
 renderer = None
-renderer_path = scripts_dir / "seo-pages-v2.py"
+renderer_path = scripts_dir / "seo-renderer.py"
 if renderer_path.exists():
     spec = importlib.util.spec_from_file_location("renometric_seo_renderer", renderer_path)
     if spec and spec.loader:
         renderer = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(renderer)
 
+calc_dir = OUT / "calculators"
+calc_dir.mkdir(exist_ok=True)
+planning_pages: list[dict] = []
+
+# Generate distinct long-tail planning pages. These are WebPage resources that
+# point to a real working core calculator instead of pretending to be standalone apps.
 if renderer:
     for idx, seo_script in enumerate(sorted(scripts_dir.glob("seo-pages-v*.py")), start=1):
         spec = importlib.util.spec_from_file_location(f"renometric_seo_batch_{idx}", seo_script)
@@ -78,9 +82,12 @@ if renderer:
         if not hasattr(module, "seo_pages"):
             continue
         for page in module.seo_pages():
+            planning_pages.append(page)
             target = calc_dir / f"{page['slug']}.html"
-            target.write_text(renderer.render_page(page, BASE, ORIGIN), encoding="utf-8")
+            target.write_text(renderer.render_planning_page(page, BASE, ORIGIN), encoding="utf-8")
 
+# Normalize all calculator/project-page canonicals to clean URLs so .html and
+# directory variants do not compete in search.
 for src in list(calc_dir.glob("*.html")):
     slug = src.stem
     clean_url = f"{ORIGIN}/calculators/{slug}"
@@ -92,12 +99,32 @@ for src in list(calc_dir.glob("*.html")):
     text = re.sub(r'<meta property="og:url" content="[^"]+">', f'<meta property="og:url" content="{clean_url}">', text)
     src.write_text(text, encoding="utf-8")
 
+# GitHub Pages has no rewrite engine, so materialize clean routes.
 for src in list(calc_dir.glob("*.html")):
-    slug = src.stem
-    clean = calc_dir / slug
+    clean = calc_dir / src.stem
     clean.mkdir(exist_ok=True)
     shutil.copy2(src, clean / "index.html")
 
+# Practical guide library lives separately from calculator/project pages.
+guides_dir = OUT / "guides"
+guides_dir.mkdir(exist_ok=True)
+guide_pages: list[dict] = []
+if renderer:
+    for idx, guide_script in enumerate(sorted(scripts_dir.glob("seo-guides-v*.py")), start=1):
+        spec = importlib.util.spec_from_file_location(f"renometric_guide_batch_{idx}", guide_script)
+        if not spec or not spec.loader:
+            continue
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        if not hasattr(module, "seo_guides"):
+            continue
+        for page in module.seo_guides():
+            guide_pages.append(page)
+            clean = guides_dir / page["slug"]
+            clean.mkdir(exist_ok=True)
+            (clean / "index.html").write_text(renderer.render_guide(page, BASE, ORIGIN), encoding="utf-8")
+
+# Trust pages also receive friendly clean routes.
 for slug in ("about", "methodology", "privacy", "terms", "contact"):
     src = OUT / f"{slug}.html"
     if src.exists():
@@ -108,7 +135,7 @@ for slug in ("about", "methodology", "privacy", "terms", "contact"):
 TOPICS = {
     "concrete": {
         "title": "Concrete Calculators & Guides",
-        "description": "Concrete volume, bags, slabs, patios, driveways, footings, waste and cubic-yard planning tools.",
+        "description": "Concrete volume, bags, slabs, patios, driveways, footings, waste and cubic-yard planning resources.",
         "links": [
             ("concrete", "Concrete Calculator"),
             ("concrete-slab-calculator", "Concrete Slab Calculator"),
@@ -170,7 +197,7 @@ TOPICS = {
     },
     "roofing-decks-fences": {
         "title": "Roofing, Deck & Fence Calculators",
-        "description": "Roof area, shingles, roofing materials, deck boards, fence posts and spacing tools for early project planning.",
+        "description": "Roof area, shingles, roofing materials, deck boards, fence posts and spacing resources for early project planning.",
         "links": [
             ("roofing", "Roofing Calculator"),
             ("roof-area-calculator", "Roof Area Calculator"),
@@ -184,11 +211,26 @@ TOPICS = {
     },
 }
 
+
 def render_topic(slug: str, topic: dict) -> str:
     canonical = f"{ORIGIN}/topics/{slug}"
-    cards = "".join(
-        f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Calculator</span><h3>{html.escape(title)}</h3><p>Open the RenoMetric planning page for this project.</p></a></article>'
+    project_cards = "".join(
+        f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Project page</span><h3>{html.escape(title)}</h3><p>Open the RenoMetric resource for this project.</p></a></article>'
         for item_slug, title in topic["links"]
+    )
+    related_guides = [g for g in guide_pages if g.get("topic") == slug]
+    guide_cards = "".join(
+        f'<article class="card"><a href="{BASE}/guides/{g["slug"]}"><span class="tag">Guide</span><h3>{html.escape(g["title"])}</h3><p>{html.escape(g["description"])}</p></a></article>'
+        for g in related_guides
+    )
+    all_items = [
+        {"@type": "ListItem", "position": i, "name": title, "url": f"{ORIGIN}/calculators/{item_slug}"}
+        for i, (item_slug, title) in enumerate(topic["links"], start=1)
+    ]
+    offset = len(all_items)
+    all_items.extend(
+        {"@type": "ListItem", "position": offset + i, "name": g["title"], "url": f"{ORIGIN}/guides/{g['slug']}"}
+        for i, g in enumerate(related_guides, start=1)
     )
     schema = {
         "@context": "https://schema.org",
@@ -196,15 +238,10 @@ def render_topic(slug: str, topic: dict) -> str:
         "name": topic["title"],
         "description": topic["description"],
         "url": canonical,
-        "mainEntity": {
-            "@type": "ItemList",
-            "itemListElement": [
-                {"@type": "ListItem", "position": i, "name": title, "url": f"{ORIGIN}/calculators/{item_slug}"}
-                for i, (item_slug, title) in enumerate(topic["links"], start=1)
-            ],
-        },
+        "mainEntity": {"@type": "ItemList", "itemListElement": all_items},
     }
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(topic['title'])} | RenoMetric</title><meta name="description" content="{html.escape(topic['description'])}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><link rel="stylesheet" href="{BASE}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{BASE}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{BASE}/#calculators">Calculators</a><a href="{BASE}/methodology.html">Methodology</a><a href="{BASE}/about.html">About</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">Project topic hub</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(topic['title'])}</h1><p>{html.escape(topic['description'])}</p></div></section><section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">Choose a project</span><h2>Calculators and planning guides</h2></div><p>Start with the page that matches the job you are estimating. Each page keeps assumptions visible and links back to a working core calculator.</p></div><div class="grid">{cards}</div><article class="article"><h2>How to use this topic hub</h2><p>Measure the real project first, choose the calculator closest to the work you are planning, then replace generic defaults with the exact product coverage, yield, package size or spacing guidance from the supplier. RenoMetric is designed for transparent planning rather than hidden assumptions.</p><p class="note"><b>Planning only:</b> final quantities can change with site conditions, installation method, product specifications and local requirements.</p></article></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Transparent home-improvement planning tools.</p></div></footer></body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(topic['title'])} | RenoMetric</title><meta name="description" content="{html.escape(topic['description'])}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><link rel="stylesheet" href="{BASE}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{BASE}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{BASE}/#calculators">Calculators</a><a href="{BASE}/guides/">Guides</a><a href="{BASE}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">Project topic hub</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(topic['title'])}</h1><p>{html.escape(topic['description'])}</p></div></section><section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">Choose a project</span><h2>Calculators and planning pages</h2></div><p>Start with the page closest to the job you are estimating, then use the related working core calculator for the actual numbers.</p></div><div class="grid">{project_cards}</div>{f'<div class="section-head" style="margin-top:42px"><div><span class="tag">Practical guides</span><h2>Measure and plan better.</h2></div></div><div class="grid">{guide_cards}</div>' if guide_cards else ''}<article class="article"><h2>How to use this topic hub</h2><p>Measure the real project first, choose the resource closest to the work you are planning, then replace generic assumptions with exact product coverage, yield, package size or spacing guidance from the supplier. RenoMetric is designed for transparent planning rather than hidden assumptions.</p><p class="note"><b>Planning only:</b> final quantities can change with site conditions, installation method, product specifications and local requirements.</p></article></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Transparent home-improvement planning tools and guides.</p></div></footer></body></html>'''
+
 
 topics_dir = OUT / "topics"
 topics_dir.mkdir(exist_ok=True)
@@ -213,6 +250,24 @@ for topic_slug, topic in TOPICS.items():
     target.mkdir(exist_ok=True)
     (target / "index.html").write_text(render_topic(topic_slug, topic), encoding="utf-8")
 
+# Build guide library index.
+guide_cards = "".join(
+    f'<article class="card"><a href="{BASE}/guides/{g["slug"]}"><span class="tag">{html.escape(g["category"])}</span><h3>{html.escape(g["title"])}</h3><p>{html.escape(g["description"])}</p></a></article>'
+    for g in guide_pages
+)
+guide_index_schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Home Improvement Planning Guides",
+    "description": "Practical measurement, material and estimating guides from RenoMetric.",
+    "url": f"{ORIGIN}/guides",
+}
+(guides_dir / "index.html").write_text(
+    f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Home Improvement Planning Guides | RenoMetric</title><meta name="description" content="Practical measurement, material and estimating guides for concrete, flooring, paint, landscaping, roofing, decks and fences."><link rel="canonical" href="{ORIGIN}/guides"><meta name="robots" content="index,follow"><link rel="stylesheet" href="{BASE}/assets/styles.css"><script type="application/ld+json">{json.dumps(guide_index_schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{BASE}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{BASE}/#calculators">Calculators</a><a href="{BASE}/guides/">Guides</a><a href="{BASE}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">RenoMetric guides</span><h1>Measure better.<br>Estimate with context.</h1><p>Short, practical guides for the assumptions behind common home-improvement material calculations.</p></div></section><section class="section"><div class="wrap"><div class="grid">{guide_cards}</div></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Planning resources for homeowners and DIY projects.</p></div></footer></body></html>''',
+    encoding="utf-8",
+)
+
+# Insert topic architecture into the homepage and keep visible resource count honest.
 home = OUT / "index.html"
 if home.exists():
     text = home.read_text(encoding="utf-8")
@@ -220,16 +275,20 @@ if home.exists():
         f'<article class="card"><a href="{BASE}/topics/{slug}"><span class="tag">Topic hub</span><h3>{html.escape(topic["title"])}</h3><p>{html.escape(topic["description"])}</p></a></article>'
         for slug, topic in TOPICS.items()
     )
-    section = f'<section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">Project topic hubs</span><h2>Go deeper by project.</h2></div><p>Explore focused calculator clusters for the jobs homeowners and DIYers search most often.</p></div><div class="grid">{topic_cards}</div></div></section>'
+    section = f'<section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">Project topic hubs</span><h2>Go deeper by project.</h2></div><p>Explore focused calculator clusters and practical guides for common renovation jobs.</p></div><div class="grid">{topic_cards}</div><p style="margin-top:22px"><a class="btn" href="{BASE}/guides/">Browse all practical guides</a></p></div></section>'
     marker = '<section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">The RenoMetric standard</span>'
     if marker in text:
         text = text.replace(marker, section + marker, 1)
-    text = text.replace('<span><b>10</b> launch tools</span>', f'<span><b>{len(list(calc_dir.glob("*.html")))}</b> calculators & guides</span>')
+    resource_count = len(list(calc_dir.glob("*.html"))) + len(guide_pages)
+    text = text.replace('<span><b>10</b> launch tools</span>', f'<span><b>{resource_count}</b> planning resources</span>')
     home.write_text(text, encoding="utf-8")
 
+# Rebuild sitemap from the actual generated resource set.
 urls = [f"{ORIGIN}/"]
 urls.extend(f"{ORIGIN}/{slug}" for slug in ("about", "methodology", "privacy", "terms", "contact"))
 urls.extend(f"{ORIGIN}/topics/{slug}" for slug in TOPICS)
+urls.append(f"{ORIGIN}/guides")
+urls.extend(f"{ORIGIN}/guides/{g['slug']}" for g in guide_pages)
 urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")))
 sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
@@ -241,4 +300,8 @@ sitemap += "\n</urlset>\n"
     encoding="utf-8",
 )
 
-print(f"Built GitHub Pages artifact at {OUT} with {len(list(calc_dir.glob('*.html')))} calculator/SEO pages and {len(TOPICS)} topic hubs")
+print(
+    f"Built GitHub Pages artifact at {OUT} with "
+    f"{len(list(calc_dir.glob('*.html')))} calculator/project pages, "
+    f"{len(guide_pages)} guides and {len(TOPICS)} topic hubs"
+)
