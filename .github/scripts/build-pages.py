@@ -39,6 +39,8 @@ for page_path in OUT.rglob("*.html"):
     text = re.sub(r"href='/((?!tangxuejia/))", f"href='{BASE}/", text)
     text = re.sub(r'src="/(?!tangxuejia/)', f'src="{BASE}/', text)
     text = re.sub(r"src='/((?!tangxuejia/))", f"src='{BASE}/", text)
+    if not BASE:
+        text = text.replace('href="/tangxuejia/', 'href="/').replace("href='/tangxuejia/", "href='/").replace('src="/tangxuejia/', 'src="/').replace("src='/tangxuejia/", "src='/")
     text = text.replace(
         '<form name="contact" method="POST"',
         '<form name="contact" method="POST" onsubmit="event.preventDefault();alert(\'Contact form is temporarily unavailable while RenoMetric is on its free preview host.\');"',
