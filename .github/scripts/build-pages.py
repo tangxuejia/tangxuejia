@@ -34,7 +34,7 @@ for item in ROOT.iterdir():
 # Adapt host-neutral source paths to the current GitHub Pages project path.
 for page_path in OUT.rglob("*.html"):
     text = page_path.read_text(encoding="utf-8")
-    text = text.replace("https://renometric.netlify.app", ORIGIN)
+    text = text.replace("https://renometric.netlify.app", ORIGIN)\n    text = text.replace("https://tangxuejia.github.io/tangxuejia", ORIGIN)
     text = re.sub(r'href="/(?!tangxuejia/)', f'href="{BASE}/', text)
     text = re.sub(r"href='/((?!tangxuejia/))", f"href='{BASE}/", text)
     text = re.sub(r'src="/(?!tangxuejia/)', f'src="{BASE}/', text)
@@ -58,7 +58,7 @@ if app.exists():
 for name in ("robots.txt", "sitemap.xml"):
     p = OUT / name
     if p.exists():
-        p.write_text(p.read_text(encoding="utf-8").replace("https://renometric.netlify.app", ORIGIN), encoding="utf-8")
+        p.write_text(p.read_text(encoding="utf-8").replace("https://renometric.netlify.app", ORIGIN).replace("https://tangxuejia.github.io/tangxuejia", ORIGIN), encoding="utf-8")
 
 scripts_dir = ROOT / ".github" / "scripts"
 renderer = None
