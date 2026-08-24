@@ -153,6 +153,7 @@ TOPICS = {
         "title": "Flooring & Tile Calculators",
         "description": "Flooring square footage, boxes, material cost, laminate, vinyl, hardwood, carpet, bathroom tile and kitchen tile planning.",
         "links": [("flooring", "Flooring Calculator"),
+            ("whole-house-renovation-planner", "Whole House Renovation Planner"),
             ("room-renovation-planner", "Room Renovation Planner"),
             ("kitchen-renovation-planner", "Kitchen Renovation Planner"),
             ("bathroom-renovation-planner", "Bathroom Renovation Planner"), ("tile", "Tile Calculator"), ("flooring-cost-calculator", "Flooring Cost Calculator"), ("laminate-flooring-calculator", "Laminate Flooring Calculator"), ("vinyl-flooring-calculator", "Vinyl Flooring Calculator"), ("hardwood-flooring-calculator", "Hardwood Flooring Calculator"), ("carpet-calculator", "Carpet Calculator"), ("room-flooring-calculator", "Room Flooring Calculator"), ("flooring-box-calculator", "Flooring Box Calculator"), ("bathroom-tile-calculator", "Bathroom Tile Calculator"), ("kitchen-tile-calculator", "Kitchen Tile Calculator")],
@@ -225,7 +226,8 @@ home = OUT / "index.html"
 if home.exists():
     text = home.read_text(encoding="utf-8")
     topic_cards = "".join(f'<article class="card"><a href="{BASE}/topics/{slug}"><span class="tag">Topic hub</span><h3>{html.escape(topic["title"])}</h3><p>{html.escape(topic["description"])}</p></a></article>' for slug, topic in TOPICS.items())
-    planner_links = [("room-renovation-planner", "Room Renovation Planner", "Flooring, paint, baseboard and a starter budget in one plan."),
+    planner_links = [("whole-house-renovation-planner", "Whole House Renovation Planner", "Combine flooring, paint, baseboard, purchase quantities and a starter budget for the whole house."),
+        ("room-renovation-planner", "Room Renovation Planner", "Flooring, paint, baseboard and a starter budget in one plan."),
         ("kitchen-renovation-planner", "Kitchen Renovation Planner", "Flooring, backsplash, countertop area and budget planning."), ("bathroom-renovation-planner", "Bathroom Renovation Planner", "Floor tile, wall tile, grout and material planning."), ("concrete-project-planner", "Concrete Project Planner", "Concrete, gravel base, rebar and budget planning."),
         ("concrete-driveway-project-planner", "Concrete Driveway Project Planner", "Concrete, gravel base, rebar and driveway budget planning."), ("deck-project-planner", "Deck Project Planner", "Deck boards, joists, screws, waste and budget planning.")]
     planner_cards = "".join(f'<article class="card"><a href="{BASE}/calculators/{slug}"><span class="tag">Project planner</span><h3>{html.escape(title)}</h3><p>{html.escape(description)}</p></a></article>' for slug, title, description in planner_links)
