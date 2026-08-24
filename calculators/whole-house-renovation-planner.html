@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Whole House Renovation Planner | RenoMetric</title>
+<meta name="description" content="Plan whole-house flooring, paint, baseboard, material quantities, waste and a preliminary renovation budget.">
+<style>
+body{font-family:system-ui,sans-serif;max-width:980px;margin:auto;padding:24px;line-height:1.55;color:#17231f;background:#f6f5f1}
+main{background:#fff;padding:24px;border-radius:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:block;margin:10px 0}input{padding:10px;width:100%;box-sizing:border-box;margin-top:5px;border:1px solid #ccd7d0;border-radius:6px}
+button{padding:12px 18px;background:#1f6b52;color:#fff;border:0;border-radius:6px;font-weight:700;margin-top:12px}
+#r{margin-top:20px;padding:18px;background:#e8f3ed;border-radius:10px}.row{display:flex;justify-content:space-between;border-bottom:1px solid #cbded3;padding:8px 0;gap:20px}.note{background:#fff7df;padding:12px;border-radius:8px}
+@media print{body{background:#fff;padding:0}main{box-shadow:none}button,a{display:none}}
+</style>
+</head>
+<body><p><a href="../">← RenoMetric</a></p>
+<main>
+<span>PROJECT PLANNER</span>
+<h1>Whole House Renovation Planner</h1>
+<p>Turn total floor area and wall measurements into a starter purchase list for flooring, paint and baseboard across multiple rooms.</p>
+<h2>House measurements</h2>
+<div class="grid">
+<label>Total floor area (ft²)<input id="floor" type="number" value="1800" min="0" step="any"></label>
+<label>Total wall perimeter (linear ft)<input id="perim" type="number" value="420" min="0" step="any"></label>
+<label>Average wall height (ft)<input id="height" type="number" value="8" min="0" step="any"></label>
+<label>Doors and windows area (ft²)<input id="openings" type="number" value="320" min="0" step="any"></label>
+<label>Flooring waste (%)<input id="fw" type="number" value="10" min="0" step="any"></label>
+<label>Paint coats<input id="coats" type="number" value="2" min="1" step="1"></label>
+<label>Paint coverage (ft²/gal)<input id="coverage" type="number" value="350" min="1" step="any"></label>
+<label>Baseboard stock length (ft)<input id="stock" type="number" value="8" min="1" step="any"></label>
+</div>
+<h2>Optional prices</h2>
+<div class="grid">
+<label>Flooring price ($/ft²)<input id="floorPrice" type="number" value="4" min="0" step="any"></label>
+<label>Paint price ($/gal)<input id="paintPrice" type="number" value="42" min="0" step="any"></label>
+<label>Baseboard price ($/piece)<input id="trimPrice" type="number" value="18" min="0" step="any"></label>
+<label>Other cost ($)<input id="other" type="number" value="0" min="0" step="any"></label>
+</div>
+<button onclick="calc()">Build whole-house plan</button>
+<button onclick="copyPlan()" style="margin-left:8px;background:#315f9b">Copy plan</button>
+<button onclick="window.print()" style="margin-left:8px;background:#6b7280">Print</button>
+<div id="r"></div>
+<h2>Important checks before buying</h2>
+<ul><li>Separate rooms may need different flooring, underlayment, transitions and trim profiles.</li><li>Paint coverage changes with texture, color change, primer and product type.</li><li>Confirm package sizes and return policy with the supplier before ordering.</li></ul>
+<p class="note"><b>Planning only:</b> This is a preliminary quantity and budget tool. It does not replace room-by-room measurements, product installation instructions, structural review or local requirements.</p>
+</main>
+<script>
+function money(n){return '$'+n.toFixed(2)}
+function calc(){
+ const floor=+document.getElementById('floor').value,perim=+document.getElementById('perim').value,height=+document.getElementById('height').value,openings=+document.getElementById('openings').value,fw=+document.getElementById('fw').value,coats=+document.getElementById('coats').value,coverage=+document.getElementById('coverage').value,stock=+document.getElementById('stock').value,floorPrice=+document.getElementById('floorPrice').value,paintPrice=+document.getElementById('paintPrice').value,trimPrice=+document.getElementById('trimPrice').value,other=+document.getElementById('other').value;
+ if(!(floor>0&&perim>0&&height>0&&openings>=0&&openings<perim*height&&fw>=0&&coats>0&&coverage>0&&stock>0)){document.getElementById('r').innerHTML='Check the measurements and make sure openings are smaller than total wall area.';return}
+ const floorOrder=floor*(1+fw/100),wallArea=Math.max(0,perim*height-openings),gallons=Math.ceil(wallArea*coats/coverage),trimPieces=Math.ceil(perim/stock*1.1),cost=floorOrder*floorPrice+gallons*paintPrice+trimPieces*trimPrice+other;
+ document.getElementById('r').innerHTML='<div class="row"><b>Floor area</b><span>'+floor.toFixed(0)+' ft²</span></div><div class="row"><b>Flooring to purchase</b><span>'+floorOrder.toFixed(0)+' ft²</span></div><div class="row"><b>Paintable wall area</b><span>'+wallArea.toFixed(0)+' ft²</span></div><div class="row"><b>Paint to purchase</b><span>'+gallons+' gallons</span></div><div class="row"><b>Baseboard to purchase</b><span>'+trimPieces+' pieces / '+perim.toFixed(0)+' linear ft</span></div><div class="row"><b>Preliminary material budget</b><span>'+money(cost)+'</span></div><h3>Purchase list</h3><ul><li>Flooring: '+floorOrder.toFixed(0)+' ft²; divide by package coverage and round up</li><li>Paint: '+gallons+' gallons; confirm primer and ceiling paint separately</li><li>Baseboard: '+trimPieces+' pieces; allow for cuts and corners</li><li>Also check: underlayment, transitions, adhesive, fasteners, delivery and disposal</li></ul>'
+}
+function copyPlan(){const text=document.getElementById('r').innerText;if(!text)return;if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>alert('Plan copied to clipboard.'));else alert(text)}
+calc()
+</script>
+</body></html>
