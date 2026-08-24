@@ -225,6 +225,7 @@ TOPICS = {
             ("pipe-flow-calculator", "Pipe Flow Calculator"),
             ("pipe-volume-calculator", "Pipe Volume Calculator"),
             ("drainage-slope-calculator", "Drainage Slope Calculator"),
+            ("drain-pipe-capacity-calculator", "Drain Pipe Capacity Calculator"),
             ("wire-size-voltage-drop-calculator", "Voltage Drop Calculator"),
         ],
     },
@@ -233,6 +234,8 @@ TOPICS = {
         "description": "Electrical load, voltage, current, watts and preliminary circuit planning resources for residential projects.",
         "links": [
             ("electrical-load-calculator", "Electrical Load Calculator"),
+            ("electricity-cost-calculator", "Electricity Cost Calculator"),
+            ("generator-size-calculator", "Generator Size Calculator"),
         ],
     },
     "hvac": {
