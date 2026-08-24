@@ -37,7 +37,7 @@ function mount(){
   const setHtml=(sel,val)=>{const el=q(sel);if(el)el.innerHTML=val};
   document.title=`${m.title} — Free Project Estimator | RenoMetric`;
   const md=q('meta[name=description]');if(md)md.content=m.desc;
-  const can=q('#canonical');if(can)can.href=`https://renometric.netlify.app/calculators/${key}`;
+  const can=q('#canonical');if(can)can.href=`https://tangxuejia.github.io/tangxuejia/calculators/${key}`;
   setText('#tool-category',m.category);setText('#tool-title',m.title);setText('#tool-desc',m.desc);
   setText('#how-title',`How the ${m.title.toLowerCase()} works`);
   setText('#how-copy',`${m.desc} RenoMetric separates measured geometry from planning assumptions so the output is easier to audit and change.`);
@@ -50,4 +50,4 @@ function mount(){
   const render=()=>{const v={};d.inputs.forEach(([id])=>v[id]=Number(q('#'+id).value)||0);const r=d.calc(v);const big=q('.big',results),sub=q('.sub',results),list=q('.result-list',results);if(big)big.textContent=r.primary;if(sub)sub.textContent=r.sub;if(list){list.innerHTML='';r.rows.forEach(([a,b])=>{const row=document.createElement('div');row.className='result-row';row.innerHTML=`<span>${a}</span><strong>${b}</strong>`;list.appendChild(row)})}};
   form.addEventListener('input',render);render();
 }
-document.addEventListener('DOMContentLoaded',mount);
+function mountLibrary(){const root=document.querySelector('#calculators');if(!root)return;const cards=[...root.querySelectorAll('.card')],search=document.querySelector('#calculator-search'),category=document.querySelector('#calculator-category'),empty=document.querySelector('#calculator-empty');const cats=[...new Set(cards.map(c=>c.querySelector('.tag')?.textContent.trim()).filter(Boolean))].sort();if(category)category.innerHTML='<option value="">All categories</option>'+cats.map(c=>'<option>'+c+'</option>').join('');const apply=()=>{const term=(search?.value||'').trim().toLowerCase(),cat=category?.value||'';let shown=0;cards.forEach(card=>{const text=card.textContent.toLowerCase(),tag=card.querySelector('.tag')?.textContent.trim()||'';const ok=(!term||text.includes(term))&&(!cat||tag===cat);card.hidden=!ok;if(ok)shown++});if(empty)empty.hidden=shown!==0};search?.addEventListener('input',apply);category?.addEventListener('change',apply)}document.addEventListener('DOMContentLoaded',()=>{mount();mountLibrary()});
