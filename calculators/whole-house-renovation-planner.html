@@ -38,7 +38,7 @@ button{padding:12px 18px;background:#1f6b52;color:#fff;border:0;border-radius:6p
 </div>
 <button onclick="calc()">Build whole-house plan</button>
 <button onclick="copyPlan()" style="margin-left:8px;background:#315f9b">Copy plan</button>
-<button onclick="window.print()" style="margin-left:8px;background:#6b7280">Print</button>
+<button onclick="window.print()" style="margin-left:8px;background:#6b7280">Print</button><button onclick="saveProject()" style="margin-left:8px;background:#8b5cf6">Save</button><button onclick="loadProject()" style="margin-left:8px;background:#64748b">Load</button>
 <div id="r"></div>
 <h2>Important checks before buying</h2>
 <ul><li>Separate rooms may need different flooring, underlayment, transitions and trim profiles.</li><li>Paint coverage changes with texture, color change, primer and product type.</li><li>Confirm package sizes and return policy with the supplier before ordering.</li></ul>
@@ -53,6 +53,9 @@ function calc(){
  document.getElementById('r').innerHTML='<div class="row"><b>Floor area</b><span>'+floor.toFixed(0)+' ft²</span></div><div class="row"><b>Flooring to purchase</b><span>'+floorOrder.toFixed(0)+' ft²</span></div><div class="row"><b>Paintable wall area</b><span>'+wallArea.toFixed(0)+' ft²</span></div><div class="row"><b>Paint to purchase</b><span>'+gallons+' gallons</span></div><div class="row"><b>Baseboard to purchase</b><span>'+trimPieces+' pieces / '+perim.toFixed(0)+' linear ft</span></div><div class="row"><b>Preliminary material budget</b><span>'+money(cost)+'</span></div><h3>Purchase list</h3><ul><li>Flooring: '+floorOrder.toFixed(0)+' ft²; divide by package coverage and round up</li><li>Paint: '+gallons+' gallons; confirm primer and ceiling paint separately</li><li>Baseboard: '+trimPieces+' pieces; allow for cuts and corners</li><li>Also check: underlayment, transitions, adhesive, fasteners, delivery and disposal</li></ul>'
 }
 function copyPlan(){const text=document.getElementById('r').innerText;if(!text)return;if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>alert('Plan copied to clipboard.'));else alert(text)}
+const ids=['floor','perim','height','openings','fw','coats','coverage','stock','floorPrice','paintPrice','trimPrice','other'];
+function saveProject(){const data={};ids.forEach(id=>data[id]=document.getElementById(id).value);localStorage.setItem('renometric-whole-house-project',JSON.stringify(data));alert('Project inputs saved on this device.')}
+function loadProject(){const raw=localStorage.getItem('renometric-whole-house-project');if(!raw){alert('No saved project found on this device.');return}const data=JSON.parse(raw);ids.forEach(id=>{if(data[id]!==undefined)document.getElementById(id).value=data[id]});calc();alert('Saved project loaded.')}
 calc()
 </script>
 </body></html>
