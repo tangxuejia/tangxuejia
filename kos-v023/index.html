@@ -108,6 +108,10 @@ async function loadPublicCatalog(){let requests=[
   ['longSteps','kos_long_case_steps?select=*&order=case_id,step_no']
 ];let out={},failed=[];for(let i=0;i<requests.length;i+=3){let batch=requests.slice(i,i+3),rows=await Promise.allSettled(batch.map(async([key,path])=>[key,await pubGet(path)]));rows.forEach((r,j)=>{if(r.status==='fulfilled'){let [key,value]=r.value;out[key]=value}else failed.push({key:batch[j][0],error:String(r.reason?.message||r.reason)})})}if(failed.length)console.warn('KOS catalog partial load',failed);out._failed=failed;return out}
 function weeklyHTML(){return ''}
+function processSummaryHTML(){return ''}
+function capabilityMapHTML(){return ''}
+function transferHTML(){return ''}
+async function recordCaseSeen(){return null}
 async function authReq(path,method='GET',body=null){let h={apikey:KEY,'Content-Type':'application/json'};if(auth?.access_token)h.Authorization='Bearer '+auth.access_token;let r=await fetch(SUPA+path,{method,headers:h,body:body?JSON.stringify(body):undefined});let txt=await r.text(),data=txt?JSON.parse(txt):null;if(!r.ok)throw Error(data?.msg||data?.message||data?.error_description||data?.error||txt);return data}
 async function cloudRest(path,method='GET',body=null,prefer=''){if(!auth?.access_token)throw Error('未登录');let h={apikey:KEY,Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'};if(prefer)h.Prefer=prefer;let r=await fetch(REST+path,{method,headers:h,body:body?JSON.stringify(body):undefined});let txt=await r.text(),data=txt?JSON.parse(txt):null;if(!r.ok){if(r.status===401&&auth?.refresh_token){await refreshAuth();return cloudRest(path,method,body,prefer)}throw Error(data?.message||txt)}return data}
 async function publicRpc(name,body){let r=await fetch(REST+'rpc/'+name,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})});let txt=await r.text(),data=txt?JSON.parse(txt):null;if(!r.ok)throw Error(data?.message||txt);return data}
