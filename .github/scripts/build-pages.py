@@ -152,7 +152,8 @@ TOPICS = {
         "title": "Flooring & Tile Calculators",
         "description": "Flooring square footage, boxes, material cost, laminate, vinyl, hardwood, carpet, bathroom tile and kitchen tile planning.",
         "links": [("flooring", "Flooring Calculator"),
-            ("room-renovation-planner", "Room Renovation Planner"), ("tile", "Tile Calculator"), ("flooring-cost-calculator", "Flooring Cost Calculator"), ("laminate-flooring-calculator", "Laminate Flooring Calculator"), ("vinyl-flooring-calculator", "Vinyl Flooring Calculator"), ("hardwood-flooring-calculator", "Hardwood Flooring Calculator"), ("carpet-calculator", "Carpet Calculator"), ("room-flooring-calculator", "Room Flooring Calculator"), ("flooring-box-calculator", "Flooring Box Calculator"), ("bathroom-tile-calculator", "Bathroom Tile Calculator"), ("kitchen-tile-calculator", "Kitchen Tile Calculator")],
+            ("room-renovation-planner", "Room Renovation Planner"),
+            ("bathroom-renovation-planner", "Bathroom Renovation Planner"), ("tile", "Tile Calculator"), ("flooring-cost-calculator", "Flooring Cost Calculator"), ("laminate-flooring-calculator", "Laminate Flooring Calculator"), ("vinyl-flooring-calculator", "Vinyl Flooring Calculator"), ("hardwood-flooring-calculator", "Hardwood Flooring Calculator"), ("carpet-calculator", "Carpet Calculator"), ("room-flooring-calculator", "Room Flooring Calculator"), ("flooring-box-calculator", "Flooring Box Calculator"), ("bathroom-tile-calculator", "Bathroom Tile Calculator"), ("kitchen-tile-calculator", "Kitchen Tile Calculator")],
     },
     "paint": {
         "title": "Paint Calculators & Guides",
