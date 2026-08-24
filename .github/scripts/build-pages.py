@@ -151,6 +151,10 @@ TOPICS = {
             ("cubic-yard-calculator", "Cubic Yard Calculator"),
             ("concrete-waste-calculator", "Concrete Waste Calculator"),
             ("how-much-concrete-do-i-need", "How Much Concrete Do I Need?"),
+            ("rebar-spacing-calculator", "Rebar Spacing Calculator"),
+            ("rebar-weight-calculator", "Rebar Weight Calculator"),
+            ("concrete-yield-calculator", "Concrete Yield Calculator"),
+            ("cmu-mortar-calculator", "CMU Mortar Calculator"),
         ],
     },
     "flooring": {
@@ -211,6 +215,29 @@ TOPICS = {
             ("deck-board-calculator", "Deck Board Calculator"),
             ("fence", "Fence Calculator"),
             ("fence-post-calculator", "Fence Post Calculator"),
+        ],
+    },
+    "plumbing": {
+        "title": "Plumbing & Drainage Calculators",
+        "description": "Water-pipe flow, pipe sizing, pressure loss and drainage slope planning tools with practical installation guides.",
+        "links": [
+            ("pipe-flow-calculator", "Pipe Flow Calculator"),
+            ("drainage-slope-calculator", "Drainage Slope Calculator"),
+        ],
+    },
+    "electrical": {
+        "title": "Electrical Load & Circuit Planning",
+        "description": "Electrical load, voltage, current, watts and preliminary circuit planning resources for residential projects.",
+        "links": [
+            ("electrical-load-calculator", "Electrical Load Calculator"),
+        ],
+    },
+    "hvac": {
+        "title": "HVAC, Heat Pump & Insulation Planning",
+        "description": "Heating and cooling BTU estimates, heat-pump screening, room-by-room load preparation and insulation planning.",
+        "links": [
+            ("hvac-btu-calculator", "HVAC BTU Calculator"),
+            ("insulation-calculator", "Insulation Calculator"),
         ],
     },
 }
