@@ -227,7 +227,7 @@ if home.exists():
     text = home.read_text(encoding="utf-8")
     topic_cards = "".join(f'<article class="card"><a href="{BASE}/topics/{slug}"><span class="tag">Topic hub</span><h3>{html.escape(topic["title"])}</h3><p>{html.escape(topic["description"])}</p></a></article>' for slug, topic in TOPICS.items())
     planner_links = [("whole-house-renovation-planner", "Whole House Renovation Planner", "Combine flooring, paint, baseboard, purchase quantities and a starter budget for the whole house."),
-        ("renovation-project-checklist", "Renovation Project Checklist", "Track measurements, quotes, purchasing, preparation, installation and final inspection.")
+        ("renovation-project-checklist", "Renovation Project Checklist", "Track measurements, quotes, purchasing, preparation, installation and final inspection."),
         ("room-renovation-planner", "Room Renovation Planner", "Flooring, paint, baseboard and a starter budget in one plan."),
         ("kitchen-renovation-planner", "Kitchen Renovation Planner", "Flooring, backsplash, countertop area and budget planning."), ("bathroom-renovation-planner", "Bathroom Renovation Planner", "Floor tile, wall tile, grout and material planning."), ("concrete-project-planner", "Concrete Project Planner", "Concrete, gravel base, rebar and budget planning."),
         ("concrete-driveway-project-planner", "Concrete Driveway Project Planner", "Concrete, gravel base, rebar and driveway budget planning."), ("deck-project-planner", "Deck Project Planner", "Deck boards, joists, screws, waste and budget planning.")]
