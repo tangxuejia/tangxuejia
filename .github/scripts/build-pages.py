@@ -142,6 +142,7 @@ TOPICS = {
         "description": "Concrete volume, bags, slabs, patios, driveways, footings, waste and cubic-yard planning resources.",
         "links": [
             ("concrete", "Concrete Calculator"),
+            ("concrete-project-planner", "Concrete Project Planner"),
             ("concrete-slab-calculator", "Concrete Slab Calculator"),
             ("concrete-cost-calculator", "Concrete Cost Calculator"),
             ("concrete-bag-calculator", "Concrete Bag Calculator"),
