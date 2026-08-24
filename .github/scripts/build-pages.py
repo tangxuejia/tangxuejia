@@ -137,6 +137,7 @@ TOPICS = {
             ("concrete-bag-calculator", "Concrete Bag Calculator"),
             ("concrete-patio-calculator", "Concrete Patio Calculator"),
             ("concrete-driveway-calculator", "Concrete Driveway Calculator"),
+            ("concrete-driveway-project-planner", "Concrete Driveway Project Planner"),
             ("concrete-footing-calculator", "Concrete Footing Calculator"),
             ("concrete-pad-calculator", "Concrete Pad Calculator"),
             ("cubic-yard-calculator", "Cubic Yard Calculator"),
