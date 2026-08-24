@@ -148,6 +148,7 @@ TOPICS = {
             ("concrete-patio-calculator", "Concrete Patio Calculator"),
             ("concrete-driveway-calculator", "Concrete Driveway Calculator"),
             ("concrete-footing-calculator", "Concrete Footing Calculator"),
+            ("concrete-pad-calculator", "Concrete Pad Calculator"),
             ("cubic-yard-calculator", "Cubic Yard Calculator"),
             ("concrete-waste-calculator", "Concrete Waste Calculator"),
             ("how-much-concrete-do-i-need", "How Much Concrete Do I Need?"),
@@ -222,7 +223,9 @@ TOPICS = {
         "description": "Water-pipe flow, pipe sizing, pressure loss and drainage slope planning tools with practical installation guides.",
         "links": [
             ("pipe-flow-calculator", "Pipe Flow Calculator"),
+            ("pipe-volume-calculator", "Pipe Volume Calculator"),
             ("drainage-slope-calculator", "Drainage Slope Calculator"),
+            ("wire-size-voltage-drop-calculator", "Voltage Drop Calculator"),
         ],
     },
     "electrical": {
@@ -237,6 +240,7 @@ TOPICS = {
         "description": "Heating and cooling BTU estimates, heat-pump screening, room-by-room load preparation and insulation planning.",
         "links": [
             ("hvac-btu-calculator", "HVAC BTU Calculator"),
+            ("hvac-airflow-calculator", "HVAC Airflow CFM Calculator"),
             ("insulation-calculator", "Insulation Calculator"),
         ],
     },
