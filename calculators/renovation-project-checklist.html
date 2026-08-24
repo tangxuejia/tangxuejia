@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Renovation Project Checklist | RenoMetric</title>
+<meta name="description" content="Use a practical renovation checklist for measurements, quotes, purchasing, preparation, installation and final inspection.">
+<style>
+body{font-family:system-ui,sans-serif;max-width:900px;margin:auto;padding:24px;line-height:1.55;color:#17231f;background:#f6f5f1}
+main{background:#fff;padding:24px;border-radius:14px}section{border:1px solid #d8e2dc;border-radius:10px;padding:14px;margin:14px 0}
+h1{line-height:1.1}label{display:block;padding:10px 4px;border-bottom:1px solid #edf1ee}input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin-right:10px}
+button{padding:12px 18px;background:#1f6b52;color:#fff;border:0;border-radius:6px;font-weight:700;margin:6px 6px 6px 0}.status{background:#e8f3ed;padding:14px;border-radius:8px;margin-top:15px}
+@media print{body{background:#fff;padding:0}button,a{display:none}}
+</style></head>
+<body><p><a href="../">← RenoMetric</a></p>
+<main>
+<span>PROJECT TOOL</span><h1>Renovation Project Checklist</h1>
+<p>Use this checklist to move from measurements to purchase-ready planning and final inspection. Progress is saved on this device.</p>
+<div id="status" class="status"></div>
+<button onclick="save()">Save progress</button><button onclick="resetAll()" style="background:#b45309">Reset</button><button onclick="window.print()" style="background:#64748b">Print</button>
+<section><h2>1. Measure and define the job</h2>
+<label><input type="checkbox">Write down room or project dimensions</label><label><input type="checkbox">Record openings, slopes, corners and unusual areas</label><label><input type="checkbox">Choose US customary or metric units consistently</label><label><input type="checkbox">Select the matching RenoMetric calculator or planner</label></section>
+<section><h2>2. Build the quantity estimate</h2>
+<label><input type="checkbox">Calculate base material quantity</label><label><input type="checkbox">Add a visible waste allowance</label><label><input type="checkbox">Check package, bag, box, bar or delivery rounding</label><label><input type="checkbox">List tools, fasteners, adhesive, primer and protection materials</label></section>
+<section><h2>3. Check prices and suppliers</h2>
+<label><input type="checkbox">Enter current local material prices</label><label><input type="checkbox">Confirm product coverage, yield and package size</label><label><input type="checkbox">Ask about delivery minimums, lead time and returns</label><label><input type="checkbox">Compare at least two supplier quotes</label></section>
+<section><h2>4. Prepare and install</h2>
+<label><input type="checkbox">Confirm subfloor, subgrade, moisture and access conditions</label><label><input type="checkbox">Confirm permits, inspections and local requirements</label><label><input type="checkbox">Protect adjacent rooms, finishes and utilities</label><label><input type="checkbox">Recheck measurements before opening materials</label></section>
+<section><h2>5. Final inspection</h2>
+<label><input type="checkbox">Check finish, joints, edges, transitions and cleanup</label><label><input type="checkbox">Keep receipts, product labels and leftover materials</label><label><input type="checkbox">Record actual quantities and final cost for the next project</label></section>
+<p><b>Safety note:</b> Structural, electrical, gas, plumbing and permit decisions may require a qualified local professional.</p>
+</main>
+<script>
+const boxes=[...document.querySelectorAll('input[type=checkbox]')],key='renometric-renovation-checklist';
+function update(){const done=boxes.filter(x=>x.checked).length;document.getElementById('status').textContent=done+' of '+boxes.length+' checklist items complete.';localStorage.setItem(key,JSON.stringify(boxes.map(x=>x.checked)))}
+function save(){update();alert('Checklist progress saved on this device.')}
+function resetAll(){boxes.forEach(x=>x.checked=false);update()}
+try{const saved=JSON.parse(localStorage.getItem(key)||'[]');boxes.forEach((x,i)=>x.checked=!!saved[i])}catch(e){}
+boxes.forEach(x=>x.addEventListener('change',update));update();
+</script></body></html>
