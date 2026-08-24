@@ -18,16 +18,16 @@ button{padding:12px 18px;background:#1f6b52;color:#fff;border:0;border-radius:6p
 <span>PROJECT PLANNER</span>
 <h1>Whole House Renovation Planner</h1>
 <p>Turn total floor area and wall measurements into a starter purchase list for flooring, paint and baseboard across multiple rooms.</p>
-<h2>House measurements</h2>
+<div style="background:#eef4f0;padding:12px;border-radius:8px"><b>Units</b> <button type="button" onclick="setUnit("us")">US customary (ft, ft²)</button><button type="button" onclick="setUnit("metric")" style="background:#315f9b">Metric (m, m²)</button><span id="unitNote"> Calculations use the selected unit system.</span></div><h2>House measurements</h2>
 <div class="grid">
-<label>Total floor area (ft²)<input id="floor" type="number" value="1800" min="0" step="any"></label>
-<label>Total wall perimeter (linear ft)<input id="perim" type="number" value="420" min="0" step="any"></label>
-<label>Average wall height (ft)<input id="height" type="number" value="8" min="0" step="any"></label>
-<label>Doors and windows area (ft²)<input id="openings" type="number" value="320" min="0" step="any"></label>
+<label><span id="floorLabel">Total floor area (ft²)</span><input id="floor" type="number" value="1800" min="0" step="any"></label>
+<label><span id="perimLabel">Total wall perimeter (linear ft)</span><input id="perim" type="number" value="420" min="0" step="any"></label>
+<label><span id="heightLabel">Average wall height (ft)</span><input id="height" type="number" value="8" min="0" step="any"></label>
+<label><span id="openingsLabel">Doors and windows area (ft²)</span><input id="openings" type="number" value="320" min="0" step="any"></label>
 <label>Flooring waste (%)<input id="fw" type="number" value="10" min="0" step="any"></label>
 <label>Paint coats<input id="coats" type="number" value="2" min="1" step="1"></label>
 <label>Paint coverage (ft²/gal)<input id="coverage" type="number" value="350" min="1" step="any"></label>
-<label>Baseboard stock length (ft)<input id="stock" type="number" value="8" min="1" step="any"></label>
+<label><span id="stockLabel">Baseboard stock length (ft)</span><input id="stock" type="number" value="8" min="1" step="any"></label>
 </div>
 <h2>Optional prices</h2>
 <div class="grid">
@@ -45,7 +45,24 @@ button{padding:12px 18px;background:#1f6b52;color:#fff;border:0;border-radius:6p
 <p class="note"><b>Planning only:</b> This is a preliminary quantity and budget tool. It does not replace room-by-room measurements, product installation instructions, structural review or local requirements.</p>
 </main>
 <script>
-function money(n){return '$'+n.toFixed(2)}
+let unit='us';
+const ids=['floor','perim','height','openings','fw','coats','coverage','stock','floorPrice','paintPrice','trimPrice','other'];
+const labels={us:{floor:'Total floor area (ft²)',perim:'Total wall perimeter (linear ft)',height:'Average wall height (ft)',openings:'Doors and windows area (ft²)',stock:'Baseboard stock length (ft)'},metric:{floor:'Total floor area (m²)',perim:'Total wall perimeter (linear m)',height:'Average wall height (m)',openings:'Doors and windows area (m²)',stock:'Baseboard stock length (m)'}};
+function money(n){return '
+ let floor=+document.getElementById('floor').value,perim=+document.getElementById('perim').value,height=+document.getElementById('height').value,openings=+document.getElementById('openings').value,fw=+document.getElementById('fw').value,coats=+document.getElementById('coats').value,coverage=+document.getElementById('coverage').value,stock=+document.getElementById('stock').value,floorPrice=+document.getElementById('floorPrice').value,paintPrice=+document.getElementById('paintPrice').value,trimPrice=+document.getElementById('trimPrice').value,other=+document.getElementById('other').value;
+const metric=unit==='metric',toFt=metric?3.280839895:1;floor*=metric?10.763910417:1;perim*=toFt;height*=toFt;openings*=metric?10.763910417:1;stock*=toFt;coverage*=metric?10.763910417:1;
+ if(!(floor>0&&perim>0&&height>0&&openings>=0&&openings<perim*height&&fw>=0&&coats>0&&coverage>0&&stock>0)){document.getElementById('r').innerHTML='Check the measurements and make sure openings are smaller than total wall area.';return}
+ const floorOrder=floor*(1+fw/100),wallArea=Math.max(0,perim*height-openings),gallons=Math.ceil(wallArea*coats/coverage),trimPieces=Math.ceil(perim/stock*1.1),cost=floorOrder*floorPrice+gallons*paintPrice+trimPieces*trimPrice+other;
+ document.getElementById('r').innerHTML='<div class="row"><b>Floor area</b><span>'+((metric?floor/10.763910417:floor)).toFixed(0)+' '+(metric?'m²':'ft²')+'</span></div><div class="row"><b>Flooring to purchase</b><span>'+((metric?floorOrder/10.763910417:floorOrder)).toFixed(0)+' '+(metric?'m²':'ft²')+'</span></div><div class="row"><b>Paintable wall area</b><span>'+((metric?wallArea/10.763910417:wallArea)).toFixed(0)+' '+(metric?'m²':'ft²')+'</span></div><div class="row"><b>Paint to purchase</b><span>'+gallons+' gallons</span></div><div class="row"><b>Baseboard to purchase</b><span>'+trimPieces+' pieces / '+((metric?perim/3.280839895:perim)).toFixed(0)+' linear '+(metric?'m':'ft')+'</span></div><div class="row"><b>Preliminary material budget</b><span>'+money(cost)+'</span></div><h3>Purchase list</h3><ul><li>Flooring: '+floorOrder.toFixed(0)+' ft²; divide by package coverage and round up</li><li>Paint: '+gallons+' gallons; confirm primer and ceiling paint separately</li><li>Baseboard: '+trimPieces+' pieces; allow for cuts and corners</li><li>Also check: underlayment, transitions, adhesive, fasteners, delivery and disposal</li></ul>'
+}
+function copyPlan(){const text=document.getElementById('r').innerText;if(!text)return;if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>alert('Plan copied to clipboard.'));else alert(text)}
+const ids=['floor','perim','height','openings','fw','coats','coverage','stock','floorPrice','paintPrice','trimPrice','other'];
+function saveProject(){const data={};ids.forEach(id=>data[id]=document.getElementById(id).value);localStorage.setItem('renometric-whole-house-project',JSON.stringify(data));alert('Project inputs saved on this device.')}
+function loadProject(){const raw=localStorage.getItem('renometric-whole-house-project');if(!raw){alert('No saved project found on this device.');return}const data=JSON.parse(raw);ids.forEach(id=>{if(data[id]!==undefined)document.getElementById(id).value=data[id]});calc();alert('Saved project loaded.')}
+calc()
+</script>
+</body></html>+n.toFixed(2)}
+function setUnit(next){if(next===unit)return;const factor=unit==='us'?0.3048:3.280839895;['perim','height','stock'].forEach(id=>document.getElementById(id).value=(+document.getElementById(id).value*factor).toFixed(2));['floor','openings'].forEach(id=>document.getElementById(id).value=(+document.getElementById(id).value*(factor*factor)).toFixed(2));unit=next;Object.keys(labels[next]).forEach(id=>document.getElementById(id+'Label').textContent=labels[next][id]);calc()}
 function calc(){
  const floor=+document.getElementById('floor').value,perim=+document.getElementById('perim').value,height=+document.getElementById('height').value,openings=+document.getElementById('openings').value,fw=+document.getElementById('fw').value,coats=+document.getElementById('coats').value,coverage=+document.getElementById('coverage').value,stock=+document.getElementById('stock').value,floorPrice=+document.getElementById('floorPrice').value,paintPrice=+document.getElementById('paintPrice').value,trimPrice=+document.getElementById('trimPrice').value,other=+document.getElementById('other').value;
  if(!(floor>0&&perim>0&&height>0&&openings>=0&&openings<perim*height&&fw>=0&&coats>0&&coverage>0&&stock>0)){document.getElementById('r').innerHTML='Check the measurements and make sure openings are smaller than total wall area.';return}
