@@ -1,56 +1,30 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Concrete Volume Calculator | Cubic Yards & Cubic Feet | RenoMetric</title>
-<meta name="description" content="Calculate concrete volume needed for slabs, footings, and projects. Convert cubic feet, cubic yards, and cubic meters with this free concrete volume calculator.">
-<link rel="canonical" href="https://tangxuejia.github.io/tangxuejia/calculators/concrete-volume-calculator">
-<link rel="stylesheet" href="/tangxuejia/assets/styles.css">
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Concrete Volume Calculator | RenoMetric</title><meta name="description" content="Calculate concrete volume in cubic feet, cubic yards, cubic meters, and bag equivalents for slabs, footings, patios, and foundations.">
+<link rel="canonical" href="https://renometric.pages.dev/calculators/concrete-volume-calculator.html">
+<link rel="stylesheet" href="/assets/styles.css"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><style>
+:root{--ink:#142a24;--muted:#587067;--line:#d8e4df;--soft:#eef4f0}
+.calc-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:24px;align-items:start}
+.calc-grid .panel,.calc-result{border:1px solid var(--line);border-radius:16px;padding:22px;background:#fff;box-shadow:0 8px 24px rgba(20,42,36,.06)}
+.calc-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.calc-form label{display:grid;gap:6px;color:var(--muted);font-size:.95rem}
+.calc-form label:first-child{grid-column:1/-1}
+.calc-form input,.calc-form select{font:inherit;padding:11px 12px;border:1px solid #b9cbc4;border-radius:9px;color:var(--ink);background:#fff}
+.calc-form button{grid-column:1/-1}
+.calc-result{background:var(--soft)}
+.calc-result .big{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;color:#153d31;line-height:1.1;margin:8px 0}
+.calc-result .sub{color:var(--muted);margin-bottom:14px}
+.calc-result p{border-top:1px solid #cfe0d7;padding:9px 0;margin:0;display:flex;justify-content:space-between;gap:12px}
+.calc-result p strong{text-align:right}
+.formula{background:#f5f8f6;border-left:4px solid #6b9b85;padding:14px;margin:16px 0}
+.note{background:#fff7e6;border:1px solid #f1d49a;border-radius:10px;padding:14px}
+@media(max-width:760px){.calc-grid{grid-template-columns:1fr}.calc-form{grid-template-columns:1fr}.calc-form label:first-child,.calc-form button{grid-column:auto}.calc-result p{display:block}.calc-result p strong{display:block;text-align:left;margin-top:3px}}
+</style></head>
 <body>
-<header class="nav"><div class="wrap nav-in"><a class="brand" href="/tangxuejia/">Reno<span>Metric</span></a></div></header>
-<main>
-<section class="hero"><div class="wrap">
-<span class="eyebrow">Construction Calculator</span>
-<h1>Concrete Volume Calculator</h1>
-<p>Estimate how much concrete you need for slabs, foundations, footings, patios, and other construction projects.</p>
-</div></section>
-
-<section class="section"><div class="wrap"><article class="article">
-<h2>How to Calculate Concrete Volume</h2>
-<p>Concrete volume is calculated by multiplying length, width, and thickness.</p>
-<div class="formula">Volume = Length × Width × Thickness</div>
-
-<h2>Example</h2>
-<p>A slab that is 20 feet long, 10 feet wide, and 4 inches thick requires approximately 66.7 cubic feet of concrete, or about 2.47 cubic yards.</p>
-
-<h2>Concrete Volume Units</h2>
-<ul>
-<li>Cubic feet (ft³) for smaller projects</li>
-<li>Cubic yards (yd³) commonly used for ordering concrete</li>
-<li>Cubic meters (m³) used in metric countries</li>
-</ul>
-
-<h2>Tips for Ordering Concrete</h2>
-<p>Add a small extra allowance for waste, uneven ground, and measurement differences. Many contractors order around 5% to 10% extra depending on the project.</p>
-
-<h2>FAQ</h2>
-<h3>How do I calculate concrete volume?</h3>
-<p>Multiply length by width by thickness, then convert the result into your preferred unit.</p>
-<h3>How many cubic yards of concrete do I need?</h3>
-<p>Divide cubic feet by 27 to convert cubic feet into cubic yards.</p>
-<h3>Should I order extra concrete?</h3>
-<p>Yes. A small extra amount helps avoid shortages during installation.</p>
-
-<h2>Related Calculators</h2>
-<p>
-<a href="/tangxuejia/calculators/concrete-slab-calculator.html">Concrete Slab Calculator</a> ·
-<a href="/tangxuejia/calculators/concrete-cost-calculator.html">Concrete Cost Calculator</a> ·
-<a href="/tangxuejia/calculators/cement-calculator.html">Cement Calculator</a>
-</p>
-</article></div></section>
-</main>
-<script src="/tangxuejia/assets/app.js" defer></script>
-</body>
-</html>
+<header class="nav"><div class="wrap nav-in"><a class="brand" href="/">Reno<span>Metric</span></a><nav class="nav-links"><a href="/#calculators">Calculators</a><a href="/methodology.html">Methodology</a><a href="/about.html">About</a></nav></div></header>
+<main><section class="hero"><div class="wrap"><span class="eyebrow">Concrete & Masonry</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">Concrete Volume Calculator</h1><p>Measure a simple rectangular section and see the net volume plus a practical ordering allowance.</p></div></section>
+<section class="section"><div class="wrap"><div class="calc-grid"><div class="panel"><span class="tag">Project inputs</span><h2 style="margin:6px 0 18px">Enter your measurements</h2><form id="calc-form" class="calc-form"><label>Unit system<select id="system"><option value="imperial">Imperial (US)</option><option value="metric">Metric</option></select></label><label id="l-label">Length (ft)<input id="length" type="number" min="0.01" step="any" value="20"></label><label id="w-label">Width (ft)<input id="width" type="number" min="0.01" step="any" value="12"></label><label id="t-label">Thickness (in)<input id="thickness" type="number" min="0.01" step="any" value="4"></label><label>Waste allowance (%)<input id="waste" type="number" min="0" step="any" value="7"></label><button class="btn primary" type="submit">Calculate concrete volume</button></form></div><aside class="calc-result" id="result" aria-live="polite"><div class="kicker">Your estimate</div><div class="big">—</div><div class="sub">Enter project inputs.</div><div class="result-list"></div></aside></div>
+<article class="article"><h2>Rectangular volume formula</h2><p>Use this page for slabs, patios, pads, footings, and other simple rectangular sections. Split irregular projects into measured rectangles and add the results.</p><div class="formula">volume = length × width × thickness<br>order volume = volume × (1 + waste)</div><p class="note"><b>Ordering note:</b> ready-mix suppliers may require a minimum order and may recommend a different allowance for pumping, access, or site conditions.</p><h2>Related tools</h2><p><a href="/calculators/concrete-slab-calculator.html">Concrete Slab Calculator</a> · <a href="/calculators/concrete-weight-calculator.html">Concrete Weight Calculator</a></p></article></div></section></main>
+<footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Estimates are for planning only. Confirm product specifications, site conditions, local prices, and final quantities with the relevant supplier or qualified professional.</p></div></footer>
+<script>const system=document.getElementById('system'),length=document.getElementById('length'),width=document.getElementById('width'),thickness=document.getElementById('thickness'),waste=document.getElementById('waste'),result=document.getElementById('result'),ll=document.getElementById('l-label'),wl=document.getElementById('w-label'),tl=document.getElementById('t-label');function mode(){const m=system.value==='metric';ll.firstChild.textContent=m?'Length (m) ':'Length (ft) ';wl.firstChild.textContent=m?'Width (m) ':'Width (ft) ';tl.firstChild.textContent=m?'Thickness (cm) ':'Thickness (in) ';if(m){length.value='6.096';width.value='3.6576';thickness.value='10.16'}else{length.value='20';width.value='12';thickness.value='4'}calc()}function calc(e){if(e)e.preventDefault();const m=system.value==='metric',l=+length.value,w=+width.value,t=+thickness.value,x=+waste.value;if(!(l>0&&w>0&&t>0&&x>=0)){result.querySelector('.big').textContent='—';result.querySelector('.sub').textContent='Check the inputs.';return}const m3=m?l*w*t/100:l*w*(t/12)*.0283168,netFt=m3/.0283168,order=m3*(1+x/100);result.querySelector('.big').textContent=(m?order:order/.764555).toFixed(2)+' '+(m?'m³':'yd³');result.querySelector('.sub').textContent='Order volume includes '+x.toFixed(1)+'% waste.';result.querySelector('.result-list').innerHTML=[['Net volume',netFt.toFixed(2)+' ft³'],['Order volume',order.toFixed(2)+' m³'],['Cubic yards',(order/.764555).toFixed(2)+' yd³'],['80-lb bag equivalent',Math.ceil(netFt/.6*(1+x/100))+' bags']].map(r=>'<p><span>'+r[0]+'</span><strong>'+r[1]+'</strong></p>').join('')}system.addEventListener('change',mode);document.getElementById('calc-form').addEventListener('submit',calc);document.getElementById('calc-form').addEventListener('input',calc);calc();</script></body></html>
