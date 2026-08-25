@@ -75,6 +75,10 @@ def _result_actions() -> str:
     return """<div class="tool-actions" style="margin:12px 0;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" onclick="copyRenoEstimate()">Copy estimate</button><button class="btn" type="button" onclick="window.print()">Print estimate</button></div><script>function copyRenoEstimate(){const title=document.querySelector('h1')?.innerText||'RenoMetric estimate';const result=document.getElementById('tool_result')?.innerText||'';const text=title+'\\n'+result;if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>alert('Estimate copied.')).catch(()=>{})}}</script>"""
 
 
+def _purchase_checklist() -> str:
+    return """<div class="article" style="margin-top:16px;background:#fff8e8;border-left:4px solid #d99b2b"><h2>Before you buy</h2><div class="grid"><label><input type="checkbox"> Re-check the measured dimensions</label><label><input type="checkbox"> Confirm product yield or package coverage</label><label><input type="checkbox"> Add waste and whole-package rounding</label><label><input type="checkbox"> Confirm delivery, tax and supplier fees</label><label><input type="checkbox"> Check local code or professional requirements</label></div><p class="note">Use the calculator result as a planning quantity, then verify the final order with the product label or supplier quote.</p></div>"""
+
+
 def render_planning_page(page: dict, base: str, origin: str) -> str:
     title = page["title"]
     description = page["description"]
@@ -89,6 +93,15 @@ def render_planning_page(page: dict, base: str, origin: str) -> str:
                 "description": description,
                 "url": canonical,
                 "isPartOf": {"@type": "WebSite", "name": "RenoMetric", "url": f"{origin}/"},
+            },
+            {
+                "@type": "WebApplication",
+                "name": title,
+                "description": description,
+                "url": canonical,
+                "applicationCategory": "UtilitiesApplication",
+                "operatingSystem": "Any",
+                "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
             },
             {
                 "@type": "BreadcrumbList",
@@ -107,7 +120,7 @@ def render_planning_page(page: dict, base: str, origin: str) -> str:
         for q, a in page["faqs"]
     )
     tool = _interactive_tool(page, base)
-    actions = _metric_tool(page) + (_result_actions() if tool else "")
+    actions = _metric_tool(page) + _purchase_checklist() + (_result_actions() if tool else "")
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} | RenoMetric</title><meta name="description" content="{html.escape(description)}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><meta property="og:title" content="{html.escape(title)} | RenoMetric"><meta property="og:description" content="{html.escape(description)}"><meta property="og:type" content="website"><meta property="og:url" content="{canonical}"><link rel="stylesheet" href="{base}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{base}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{base}/#calculators">Calculators</a><a href="{base}/methodology.html">Methodology</a><a href="{base}/about.html">About</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">{html.escape(page['category'])}</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(title)}</h1><p>{html.escape(description)}</p><div class="pill-row"><span class="pill">Planning guide</span><span class="pill">No sign-up</span><span class="pill">Transparent assumptions</span></div></div></section><section class="section"><div class="wrap"><article class="article"><span class="tag">Start with real measurements</span><h2>Quick answer</h2><p>{html.escape(description)} Use the working RenoMetric calculator below for the actual estimate, then use this page to check assumptions, package rounding and project-specific considerations.</p>{tool}{actions}<p><a class="btn primary" href="{parent_url}">Open the working {html.escape(page['parent'].title())} calculator</a></p><h2>Formula</h2><div class="formula">{html.escape(page['formula'])}</div><h2>Worked planning example</h2><p>{html.escape(page['example'])}</p><h2>Common uses</h2><ul>{uses}</ul><h2>How to get a better estimate</h2><p>Measure the actual project rather than relying on listing dimensions. For irregular spaces, split the surface into simple measurable sections and add the results. Use the exact product label for package coverage, yield, density or square-foot coverage whenever it is available.</p><p>Keep waste and package rounding as separate steps. Waste covers cuts, breakage, pattern matching and unavoidable offcuts. Package rounding reflects the fact that many materials are sold only in complete bags, boxes, bundles or cans.</p><p class="note"><b>Before you buy:</b> this page is a planning guide, not a contractor quotation or structural design. Verify final quantities with the product manufacturer, supplier or installer when project conditions could materially change the result.</p><h2>{html.escape(title)} FAQ</h2>{faqs}<h2>Use the calculator</h2><p><a class="pill" href="{parent_url}">Open {html.escape(page['parent'].title())} Calculator</a> <a class="pill" href="{base}/#calculators">Browse all RenoMetric calculators</a></p></article></div></section></main>{_footer(base)}</body></html>'''
 
 
