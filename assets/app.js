@@ -25,6 +25,35 @@ const defs={
  fence:{inputs:[['run','Fence run','ft',120],['spacing','Max post spacing','ft',8],['corners','Extra corner/end posts','pcs',1]],calc:v=>{const sections=ceil(v.run/v.spacing),posts=sections+1+v.corners,actual=v.run/sections;return {primary:`${posts} posts`,sub:'Spacing is treated as a maximum planning interval.',rows:[['Fence sections',`${sections}`],['Approx. spacing',`${fmt(actual,2)} ft`],['Run length',`${fmt(v.run,0)} ft`],['Extra posts',`${fmt(v.corners,0)}`]]}}},
  squarefeet:{inputs:[['length','Length','ft',12],['width','Width','ft',10],['qty','Number of equal areas','',1]],calc:v=>{const area=v.length*v.width*v.qty;return {primary:`${fmt(area,2)} ft²`,sub:'Total area for the number of equal rectangles entered.',rows:[['One area',`${fmt(v.length*v.width,2)} ft²`],['Square yards',`${fmt(area/9,2)} yd²`],['Square meters',`${fmt(area*.092903,2)} m²`],['Perimeter (one)',`${fmt(2*(v.length+v.width),2)} ft`]]}}}
 };
+
+const unitMap={ft:{metric:"m",toMetric:v=>v*0.3048,fromMetric:v=>v/0.3048},"in":{metric:"cm",toMetric:v=>v*2.54,fromMetric:v=>v/2.54},"ft²":{metric:"m²",toMetric:v=>v*0.092903,fromMetric:v=>v/0.092903},"ft³":{metric:"m³",toMetric:v=>v*0.0283168,fromMetric:v=>v/0.0283168},"lb/ft³":{metric:"kg/m³",toMetric:v=>v*16.018463,fromMetric:v=>v/16.018463}};
+const convertUnit=(unit,value,from,to)=>{if(from===to||!unitMap[unit])return value;return from==="imperial"?unitMap[unit].toMetric(value):unitMap[unit].fromMetric(value)};
+const shownUnit=(unit,mode)=>mode==="metric"&&unitMap[unit]?unitMap[unit].metric:unit;
+const metricPrimary=(key,v)=>{const waste=1+(v.waste||0)/100;
+ if(key==="concrete")return fmt(v.length*v.width*(v.depth/12)/27*waste*.764555,2)+" m³";
+ if(key==="paint"){const wall=2*(v.length+v.width)*v.height,gal=Math.max(0,wall-v.openings)*(v.coats||0)/v.coverage;return fmt(gal*3.78541,1)+" L";}
+ if(key==="flooring")return ceil(v.length*v.width*waste/v.boxCoverage)+" boxes";
+ if(key==="tile"){const area=v.length*v.width,tile=v.tileL*v.tileW/144;return ceil(area/tile*waste/v.box)+" boxes";}
+ if(key==="gravel"){const ft3=v.length*v.width*(v.depth/12)*waste;return fmt(ft3*v.density/2000*.907185,2)+" metric tonnes";}
+ if(key==="mulch")return fmt(v.length*v.width*(v.depth/12)*waste/35.3147,2)+" m³";
+ if(key==="roofing"){const factor=Math.sqrt(1+(v.pitch/12)**2),area=v.length*v.width*factor*waste;return fmt(area*.092903,1)+" m²";}
+ if(key==="deck"){const coverage=(v.boardW+v.gap)/12,rows=ceil(v.width/coverage),linear=rows*v.length*waste;return fmt(linear*.3048,1)+" linear m";}
+ if(key==="fence")return ceil(v.run/v.spacing)+1+(v.corners||0)+" posts";
+ if(key==="squarefeet")return fmt(v.length*v.width*v.qty*.092903,2)+" m²";
+ return null};
+const metricRows=(key,v)=>{const rows=[];
+ if(key==="concrete"){const net=v.length*v.width*(v.depth/12)/27;rows.push(["Net volume",fmt(net*.764555,2)+" m³"],["Order volume",fmt(net*(1+v.waste/100)*.764555,2)+" m³"])}
+ if(key==="paint"){const wall=2*(v.length+v.width)*v.height;rows.push(["Wall area",fmt(wall*.092903,1)+" m²"],["Paintable area / coat",fmt(Math.max(0,wall-v.openings)*.092903,1)+" m²"],["Paint required",fmt(Math.max(0,wall-v.openings)*v.coats/v.coverage*3.78541,1)+" L"])}
+ if(key==="tile"){rows.push(["Surface area",fmt(v.length*v.width*.092903,2)+" m²"])}
+ if(key==="flooring"){const area=v.length*v.width;rows.push(["Room area",fmt(area*.092903,2)+" m²"],["Area incl. waste",fmt(area*(1+v.waste/100)*.092903,2)+" m²"],["Coverage per box",fmt(v.boxCoverage*.092903,2)+" m²"])}
+ if(key==="gravel"){const ft3=v.length*v.width*(v.depth/12);rows.push(["Net volume",fmt(ft3*.0283168,2)+" m³"],["Order volume",fmt(ft3*(1+v.waste/100)*.0283168,2)+" m³"],["Estimated weight",fmt(ft3*(1+v.waste/100)*v.density*.453592,0)+" kg"],["Estimated weight",fmt(ft3*(1+v.waste/100)*v.density/2000*.907185,2)+" metric tonnes"])}
+ if(key==="mulch"){const ft3=v.length*v.width*(v.depth/12);rows.push(["Net volume",fmt(ft3*.0283168,2)+" m³"],["Order volume",fmt(ft3*(1+v.waste/100)*.0283168,2)+" m³"])}
+ if(key==="roofing"){const factor=Math.sqrt(1+(v.pitch/12)**2),area=v.length*v.width*factor;rows.push(["Sloped roof area",fmt(area*.092903,1)+" m²"],["Area incl. waste",fmt(area*(1+v.waste/100)*.092903,1)+" m²"])}
+ if(key==="deck"){const coverage=(v.boardW+v.gap)/12,rowsCount=ceil(v.width/coverage),linear=rowsCount*v.length;rows.push(["Net board length",fmt(linear*.3048,1)+" linear m"],["With waste",fmt(linear*(1+v.waste/100)*.3048,1)+" linear m"])}
+ if(key==="fence"){rows.push(["Fence run",fmt(v.run*.3048,1)+" m"],["Approx. spacing",fmt((v.run/ceil(v.run/v.spacing))*.3048,2)+" m"])}
+ if(key==="squarefeet"){const area=v.length*v.width*v.qty;rows.push(["Square meters",fmt(area*.092903,2)+" m²"],["Perimeter",fmt(2*(v.length+v.width)*.3048,2)+" m"])}
+ return rows};
+
 function mount(){
   const root=q('[data-calculator]');if(!root)return;
   const params=new URLSearchParams(location.search);
@@ -35,19 +64,33 @@ function mount(){
   root.dataset.calculator=key;
   const setText=(sel,val)=>{const el=q(sel);if(el)el.textContent=val};
   const setHtml=(sel,val)=>{const el=q(sel);if(el)el.innerHTML=val};
-  document.title=`${m.title} — Free Project Estimator | RenoMetric`;
+  document.title=m.title+' — Free Project Estimator | RenoMetric';
   const md=q('meta[name=description]');if(md)md.content=m.desc;
-  const can=q('#canonical');if(can)can.href=`https://tangxuejia.github.io/tangxuejia/calculators/${key}`;
   setText('#tool-category',m.category);setText('#tool-title',m.title);setText('#tool-desc',m.desc);
-  setText('#how-title',`How the ${m.title.toLowerCase()} works`);
-  setText('#how-copy',`${m.desc} RenoMetric separates measured geometry from planning assumptions so the output is easier to audit and change.`);
-  setText('#formula',m.formula);setText('#example',m.example);setText('#faq-title',`${m.title} FAQ`);
+  setText('#how-title','How the '+m.title.toLowerCase()+' works');
+  setText('#how-copy',m.desc+' RenoMetric separates measured geometry from planning assumptions so the output is easier to audit and change.');
+  setText('#formula',m.formula);setText('#example',m.example);setText('#faq-title',m.title+' FAQ');
   setHtml('#faq-list','<div class="faq"><h3>How should I use this estimate?</h3><p>Use the measurements and product values from your actual project. Important assumptions stay visible so you can adjust them.</p></div><div class="faq"><h3>Is the result exact?</h3><p>No. Coverage, yield, breakage, site conditions, packaging, and installation methods can change the final quantity.</p></div><div class="faq"><h3>What about unusual shapes?</h3><p>Split the project into simple measured sections, calculate each section, and add the results.</p></div>');
-  const related=q('#related');if(related)related.innerHTML=Object.entries(meta).filter(([k])=>k!==key).slice(0,5).map(([k,x])=>`<a class="pill" href="/calculators/${k}">${x.title}</a>`).join('');
+  const related=q('#related');if(related)related.innerHTML=Object.entries(meta).filter(([k])=>k!==key).slice(0,5).map(([k,x])=>'<a class="pill" href="/calculators/'+k+'">'+x.title+'</a>').join('');
   const form=q('#calc-form'),results=q('#calc-results');if(!form||!results)return;
+  let mode='imperial';
+  const unitBar=document.createElement('div');unitBar.className='unit-switch';unitBar.innerHTML='<label for="unit-mode"><b>Units</b></label><select id="unit-mode" aria-label="Units"><option value="imperial">Imperial (US)</option><option value="metric">Metric</option></select>';
+  form.parentNode.insertBefore(unitBar,form);
   form.innerHTML='';
-  d.inputs.forEach(([id,label,unit,val])=>{const el=document.createElement('div');el.className='field';el.innerHTML=`<label for="${id}">${label}${unit?` <span style="color:#718079;font-weight:600">(${unit})</span>`:''}</label><input id="${id}" name="${id}" type="number" min="0" step="any" value="${val}" inputmode="decimal">`;form.appendChild(el)});
-  const render=()=>{const v={};d.inputs.forEach(([id])=>v[id]=Number(q('#'+id).value)||0);const r=d.calc(v);const big=q('.big',results),sub=q('.sub',results),list=q('.result-list',results);if(big)big.textContent=r.primary;if(sub)sub.textContent=r.sub;if(list){list.innerHTML='';r.rows.forEach(([a,b])=>{const row=document.createElement('div');row.className='result-row';row.innerHTML=`<span>${a}</span><strong>${b}</strong>`;list.appendChild(row)})}};
-  form.addEventListener('input',render);render();
+  d.inputs.forEach(([id,label,unit,val])=>{const el=document.createElement('div');el.className='field';el.innerHTML='<label for="'+id+'">'+label+(unit?' <span class="input-unit">('+unit+')</span>':'')+'</label><input id="'+id+'" name="'+id+'" type="number" min="0" step="any" value="'+val+'" inputmode="decimal">';form.appendChild(el)});
+  const refreshLabels=()=>{d.inputs.forEach(([id,label,unit])=>{const labelEl=form.querySelector('label[for="'+id+'"]');if(labelEl)labelEl.innerHTML=label+(unit?' <span class="input-unit">('+shownUnit(unit,mode)+')</span>':'')})};
+  const readValues=()=>{const v={};d.inputs.forEach(([id,label,unit])=>{const input=q('#'+id);v[id]=convertUnit(unit,Number(input&&input.value)||0,mode,'imperial')});return v};
+  const render=()=>{const v=readValues(),r=d.calc(v),big=q('.big',results),sub=q('.sub',results),list=q('.result-list',results);if(big)big.textContent=mode==='metric'?(metricPrimary(key,v)||r.primary):r.primary;if(sub)sub.textContent=mode==='metric'?'Metric result with US purchase equivalents shown below.':r.sub;if(list){list.innerHTML='';const rows=mode==='metric'?r.rows.concat(metricRows(key,v)):r.rows;rows.forEach(([a,b])=>{const row=document.createElement('div');row.className='result-row';row.innerHTML='<span>'+a+'</span><strong>'+b+'</strong>';list.appendChild(row)})}};
+  d.inputs.forEach(([id])=>q('#'+id)?.addEventListener('input',render));
+  const modeSelect=q('#unit-mode');modeSelect.addEventListener('change',()=>{const next=modeSelect.value;d.inputs.forEach(([id,label,unit])=>{const input=q('#'+id);if(input)input.value=String(Number(convertUnit(unit,Number(input.value)||0,mode,next).toFixed(6)))});mode=next;refreshLabels();render()});
+  refreshLabels();render();
+  const actionBar=document.createElement('div');actionBar.className='tool-actions';actionBar.innerHTML='<button class="btn" type="button" data-action="copy">Copy estimate</button><button class="btn" type="button" data-action="print">Print estimate</button><button class="btn" type="button" data-action="share">Share</button><span class="action-status" aria-live="polite"></span>';
+  results.appendChild(actionBar);
+  const estimateText=()=>m.title+'\n'+results.innerText;
+  const status=actionBar.querySelector('.action-status');
+  actionBar.querySelector('[data-action="copy"]').addEventListener('click',()=>{if(!navigator.clipboard){status.textContent='Copy is unavailable in this browser.';return}navigator.clipboard.writeText(estimateText()).then(()=>{status.textContent='Copied.'}).catch(()=>{status.textContent='Copy failed.'})});
+  actionBar.querySelector('[data-action="print"]').addEventListener('click',()=>window.print());
+  actionBar.querySelector('[data-action="share"]').addEventListener('click',()=>{if(navigator.share){navigator.share({title:m.title,text:estimateText(),url:location.href}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(estimateText()).then(()=>{status.textContent='Copied for sharing.'}).catch(()=>{status.textContent='Sharing is unavailable.'})}else status.textContent='Sharing is unavailable.'});
 }
+
 function mountLibrary(){const root=document.querySelector('#calculators');if(!root)return;const cards=[...root.querySelectorAll('.card')],search=document.querySelector('#calculator-search'),category=document.querySelector('#calculator-category'),empty=document.querySelector('#calculator-empty');const cats=[...new Set(cards.map(c=>c.querySelector('.tag')?.textContent.trim()).filter(Boolean))].sort();if(category)category.innerHTML='<option value="">All categories</option>'+cats.map(c=>'<option>'+c+'</option>').join('');const apply=()=>{const term=(search?.value||'').trim().toLowerCase(),cat=category?.value||'';let shown=0;cards.forEach(card=>{const text=card.textContent.toLowerCase(),tag=card.querySelector('.tag')?.textContent.trim()||'';const ok=(!term||text.includes(term))&&(!cat||tag===cat);card.hidden=!ok;if(ok)shown++});if(empty)empty.hidden=shown!==0};search?.addEventListener('input',apply);category?.addEventListener('change',apply)}document.addEventListener('DOMContentLoaded',()=>{mount();mountLibrary()});
