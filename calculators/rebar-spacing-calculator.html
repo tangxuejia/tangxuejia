@@ -65,13 +65,13 @@ function calculate(event){
   const usableIn=Math.max(0,widthIn-2*edgeIn);
   const bars=Math.ceil(usableIn/spacingIn)+1;
   const usable=metric?usableIn*2.54/100:usableIn/12;
-  const spacingShown=metric?spacing+' cm':spacing+' in';
+  const spacingShown=metric?spacing.value+' cm':spacing.value+' in';
   const unit=metric?'m':'ft';
   result.querySelector('.big').textContent=bars+' bars';
   result.querySelector('.sub').textContent='Planning count at '+spacingShown+' maximum spacing.';
   result.querySelector('.result-list').innerHTML=[
     ['Usable width',usable.toFixed(2)+' '+unit],
-    ['Edge clearance',edge+' '+(metric?'cm':'in')+' each side'],
+    ['Edge clearance',edge.value+' '+(metric?'cm':'in')+' each side'],
     ['Selected spacing',spacingShown],
     ['Formula','ceil(usable width ÷ spacing) + 1']
   ].map(function(row){return '<p><b>'+row[0]+':</b> '+row[1]+'</p>'}).join('');
