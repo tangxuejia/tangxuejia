@@ -82,9 +82,7 @@ if renderer:
         for page in module.seo_pages():
             planning_pages.append(page)
             target = calc_dir / f"{page['slug']}.html"
-            rendered = renderer.render_planning_page(page, BASE, ORIGIN)
-            rendered = rendered.replace("</body>", f'<script src="{BASE}/assets/workspace.js" defer></script></body>')
-            target.write_text(rendered, encoding="utf-8")
+            target.write_text(renderer.render_planning_page(page, BASE, ORIGIN), encoding="utf-8")
 
 for src in list(calc_dir.glob("*.html")):
     slug = src.stem
