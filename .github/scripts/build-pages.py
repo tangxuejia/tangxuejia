@@ -240,6 +240,13 @@ if home.exists():
     text = text.replace('<span><b>10</b> launch tools</span>', f'<span><b>{resource_count}</b> planning resources</span>')
     home.write_text(text, encoding="utf-8")
 
+favicon_href = f"{BASE}/favicon.svg"
+for page_path in OUT.rglob("*.html"):
+    text = page_path.read_text(encoding="utf-8")
+    if 'rel="icon"' not in text:
+        text = text.replace("</head>", f'<link rel="icon" href="{favicon_href}" type="image/svg+xml"></head>', 1)
+    page_path.write_text(text, encoding="utf-8")
+
 urls = [f"{ORIGIN}/"]
 urls.extend(f"{ORIGIN}/{slug}" for slug in ("about", "methodology", "privacy", "terms", "contact"))
 urls.extend(f"{ORIGIN}/topics/{slug}" for slug in TOPICS)
@@ -251,6 +258,6 @@ sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
 sitemap += "\n</urlset>\n"
 (OUT / "sitemap.xml").write_text(sitemap, encoding="utf-8")
 
-(OUT / "404.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found — RenoMetric</title><link rel="stylesheet" href="{BASE}/assets/styles.css"></head><body><main class="section"><div class="wrap"><article class="article"><h1>Page not found</h1><p>The page may have moved.</p><p><a class="btn primary" href="{BASE}/">Back to RenoMetric</a></p></article></div></main></body></html>''', encoding="utf-8")
+(OUT / "404.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found — RenoMetric</title><link rel="icon" href="{BASE}/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{BASE}/assets/styles.css"></head><body><main class="section"><div class="wrap"><article class="article"><h1>Page not found</h1><p>The page may have moved.</p><p><a class="btn primary" href="{BASE}/">Back to RenoMetric</a></p></article></div></main></body></html>''', encoding="utf-8")
 
 print(f"Built GitHub Pages artifact at {OUT} with {len(list(calc_dir.glob('*.html')))} calculator/project pages, {len(guide_pages)} guides and {len(TOPICS)} topic hubs")
