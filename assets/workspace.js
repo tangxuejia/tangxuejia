@@ -62,7 +62,7 @@
     panel.className = "workspace-panel";
     panel.innerHTML = '<div class="workspace-head"><div><span class="tag">Project workspace</span>' +
       '<h2>Save estimates and build a purchase list</h2><p>Keep this project on this device. No account or upload required.</p></div>' +
-      '<button type="button" class="btn" id="workspace-copy">Copy purchase notes</button></div>' +
+      '<div class="workspace-head-actions"><a href="/project.html" class="btn">Open project dashboard</a><button type="button" class="btn" id="workspace-copy">Copy purchase notes</button></div></div>' +
       '<div class="workspace-save"><label for="workspace-name">Project or estimate name</label>' +
       '<div class="workspace-save-row"><input id="workspace-name" placeholder="e.g. Backyard patio" maxlength="80">' +
       '<button type="button" class="btn primary" id="workspace-save">Save current estimate</button></div></div>' +
