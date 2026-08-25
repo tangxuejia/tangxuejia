@@ -1,1 +1,86 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rebar Weight Calculator — US Bar Sizes & Metric | RenoMetric</title><meta name="description" content="Calculate reinforcing bar total length and weight using common US bar sizes or metric diameters."><link rel="canonical" href="https://tangxuejia.github.io/tangxuejia/calculators/rebar-weight-calculator"><link rel="stylesheet" href="/tangxuejia/assets/styles.css"></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="/tangxuejia/">Reno<span>Metric</span></a><nav class="nav-links"><a href="/tangxuejia/#calculators">Calculators</a><a href="/tangxuejia/methodology.html">Methodology</a><a href="/tangxuejia/about.html">About</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">Construction Planning</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">Rebar Weight Calculator</h1><p>Estimate reinforcing bar length and weight with US bar sizes or metric diameters.</p></div></section><section class="section"><div class="wrap calculator-layout"><div class="panel"><span class="tag">Project inputs</span><h2 style="margin:6px 0 18px">Enter reinforcement details</h2><form id="f" class="form-grid"><label>Bar system<select id="sys"><option value="us">US bar size</option><option value="metric">Metric diameter</option></select></label><label id="sizeLabel">Bar size<select id="size"><option value=".376">#3</option><option value=".668">#4</option><option value="1.043" selected>#5</option><option value="1.502">#6</option><option value="2.044">#7</option><option value="2.670">#8</option><option value="3.400">#9</option><option value="4.303">#10</option></select></label><label>Number of bars<input id="count" type="number" min="1" step="1" value="20"></label><label>Length per bar (ft)<input id="len" type="number" min="0" step="any" value="20"></label><button class="btn primary" type="submit">Calculate rebar weight</button></form></div><aside class="result" id="r" aria-live="polite"><div class="kicker">Your estimate</div><div class="big">—</div><div class="sub">Enter project inputs.</div><div class="result-list"></div></aside></div><div class="wrap"><article class="article"><span class="tag">Transparent formula</span><h2>How rebar weight is calculated</h2><p>US bar sizes use published unit weights in pounds per foot. Metric bars use the common theoretical mass relationship based on diameter squared.</p><div class="formula">total weight = bar count × length × unit weight<br>metric kg/m ≈ diameter² ÷ 162</div><h2>Worked example</h2><p>Twenty #5 bars at 20 ft each contain 400 linear feet. At about 1.043 lb/ft, the estimated weight is 417.2 lb.</p><p class="note"><b>Planning only:</b> bar size, spacing, laps, hooks, cover and reinforcement design must come from the project drawings and applicable local requirements. This tool estimates material weight; it does not design reinforcement.</p></article></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Estimates are for planning only.</p></div></footer><script>const sys=document.getElementById('sys'),size=document.getElementById('size'),label=document.getElementById('sizeLabel'),r=document.getElementById('r');function change(){if(sys.value==='metric'){label.firstChild.textContent='Diameter ';size.innerHTML='<option value="6">6 mm</option><option value="8">8 mm</option><option value="10">10 mm</option><option value="12">12 mm</option><option value="16" selected>16 mm</option><option value="20">20 mm</option><option value="25">25 mm</option><option value="32">32 mm</option>'}else{label.firstChild.textContent='Bar size ';size.innerHTML='<option value=".376">#3</option><option value=".668">#4</option><option value="1.043" selected>#5</option><option value="1.502">#6</option><option value="2.044">#7</option><option value="2.670">#8</option><option value="3.400">#9</option><option value="4.303">#10</option>'}calc()}function calc(e){if(e)e.preventDefault();const n=+document.getElementById('count').value,l=+document.getElementById('len').value,v=+size.value;if(!(n>0&&l>0)){r.querySelector('.big').textContent='—';return}let weight,unit;if(sys.value==='metric'){weight=v*v/162*l*n*0.3048;unit='kg';}else{weight=v*l*n;unit='lb';}r.querySelector('.big').textContent=weight.toFixed(1)+' '+unit;r.querySelector('.sub').textContent=(n*l).toFixed(1)+' linear ft total';r.querySelector('.result-list').innerHTML='<p><b>Bars:</b> '+n+'</p><p><b>Length each:</b> '+l+' ft</p><p><b>System:</b> '+(sys.value==='us'?'US bar size':'metric diameter')+'</p>'}sys.addEventListener('change',change);document.getElementById('f').addEventListener('submit',calc);document.getElementById('f').addEventListener('input',calc);calc();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rebar Weight Calculator — US Bar Sizes & Metric | RenoMetric</title>
+<meta name="description" content="Calculate reinforcing bar total length and approximate weight using common US bar sizes or metric diameters.">
+<link rel="canonical" href="https://renometric.pages.dev/calculators/rebar-weight-calculator.html">
+<link rel="stylesheet" href="/assets/styles.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<header class="nav"><div class="wrap nav-in"><a class="brand" href="/">Reno<span>Metric</span></a><nav class="nav-links"><a href="/#calculators">Calculators</a><a href="/methodology.html">Methodology</a><a href="/about.html">About</a></nav></div></header>
+<main>
+<section class="hero"><div class="wrap"><span class="eyebrow">Concrete & Masonry</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">Rebar Weight Calculator</h1><p>Estimate reinforcing bar length and weight with common US bar sizes or metric diameters.</p></div></section>
+<section class="section"><div class="wrap">
+<div class="calculator-layout">
+<div class="panel"><span class="tag">Project inputs</span><h2 style="margin:6px 0 18px">Enter reinforcement details</h2>
+<form id="form" class="form-grid">
+<label>Bar system<select id="system"><option value="us">US bar size</option><option value="metric">Metric diameter</option></select></label>
+<label id="size-label">Bar size<select id="size"><option value="0.376">US #3</option><option value="0.668">US #4</option><option value="1.043" selected>US #5</option><option value="1.502">US #6</option><option value="2.044">US #7</option><option value="2.670">US #8</option><option value="3.400">US #9</option><option value="4.303">US #10</option><option value="5.313">US #11</option></select></label>
+<label>Number of bars<input id="count" type="number" min="1" step="1" value="20"></label>
+<label id="length-label">Length per bar (ft)<input id="length" type="number" min="0.01" step="any" value="20"></label>
+<button class="btn primary" type="submit">Calculate rebar weight</button>
+</form></div>
+<aside class="result" id="result" aria-live="polite"><div class="kicker">Your estimate</div><div class="big">—</div><div class="sub">Enter project inputs.</div><div class="result-list"></div></aside>
+</div>
+<article class="article"><span class="tag">Transparent formula</span><h2>How rebar weight is calculated</h2><p>US bar sizes use published nominal weights in pounds per foot. Metric bars use the common theoretical relationship based on diameter squared.</p><div class="formula">total weight = bar count × length × unit weight<br>metric kg/m ≈ diameter² ÷ 162</div><p class="note"><b>Planning only:</b> this tool estimates material weight. Bar size, spacing, laps, hooks, cover and reinforcement design must come from the project drawings and applicable local requirements.</p><h2>Related tools</h2><p><a href="/calculators/rebar-calculator.html">Rebar Quantity Calculator</a> · <a href="/calculators/rebar-spacing-calculator.html">Rebar Spacing Calculator</a></p></article>
+</div></section>
+</main>
+<footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Estimates are for planning only.</p></div></footer>
+<script>
+const system=document.getElementById('system');
+const size=document.getElementById('size');
+const sizeLabel=document.getElementById('size-label');
+const lengthLabel=document.getElementById('length-label');
+const length=document.getElementById('length');
+const count=document.getElementById('count');
+const result=document.getElementById('result');
+function setMode(){
+  const metric=system.value==='metric';
+  sizeLabel.firstChild.textContent=metric?'Bar diameter ':'Bar size ';
+  lengthLabel.firstChild.textContent=metric?'Length per bar (m) ':'Length per bar (ft) ';
+  if(metric){
+    size.innerHTML='<option value="0.222">6 mm</option><option value="0.395">8 mm</option><option value="0.617">10 mm</option><option value="0.889">12 mm</option><option value="1.580" selected>16 mm</option><option value="2.469">20 mm</option><option value="3.858">25 mm</option><option value="6.321">32 mm</option>';
+    length.value='6.096';
+  }else{
+    size.innerHTML='<option value="0.376">US #3</option><option value="0.668">US #4</option><option value="1.043" selected>US #5</option><option value="1.502">US #6</option><option value="2.044">US #7</option><option value="2.670">US #8</option><option value="3.400">US #9</option><option value="4.303">US #10</option><option value="5.313">US #11</option>';
+    length.value='20';
+  }
+  calculate();
+}
+function calculate(event){
+  if(event)event.preventDefault();
+  const metric=system.value==='metric';
+  const n=Number(count.value);
+  const l=Number(length.value);
+  const unitWeight=Number(size.value);
+  if(!(n>0&&l>0&&unitWeight>0)){
+    result.querySelector('.big').textContent='—';
+    result.querySelector('.sub').textContent='Check the inputs.';
+    result.querySelector('.result-list').innerHTML='';
+    return;
+  }
+  const totalLength=metric?l*n:l*n;
+  const weight=metric?totalLength*unitWeight:totalLength*unitWeight;
+  const lengthUnit=metric?'m':'ft';
+  const weightUnit=metric?'kg':'lb';
+  const unitLabel=metric?'kg/m':'lb/ft';
+  result.querySelector('.big').textContent=weight.toFixed(1)+' '+weightUnit;
+  result.querySelector('.sub').textContent=totalLength.toFixed(1)+' linear '+lengthUnit+' total';
+  result.querySelector('.result-list').innerHTML=[
+    ['Bars',n.toLocaleString()],
+    ['Length per bar',l+' '+lengthUnit],
+    ['Total length',totalLength.toFixed(1)+' linear '+lengthUnit],
+    ['Nominal unit weight',unitWeight.toFixed(3)+' '+unitLabel],
+    ['System',metric?'Metric diameter':'US bar size']
+  ].map(function(row){return '<p><b>'+row[0]+':</b> '+row[1]+'</p>'}).join('');
+}
+system.addEventListener('change',setMode);
+document.getElementById('form').addEventListener('submit',calculate);
+document.getElementById('form').addEventListener('input',calculate);
+calculate();
+</script>
+</body>
+</html>
