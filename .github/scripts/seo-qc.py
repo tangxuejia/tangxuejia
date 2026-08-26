@@ -45,12 +45,26 @@ else:
         if not sitemap_urls:
             errors.append("sitemap contains no URLs")
         public_files = []
+        expected_origin = ORIGIN.rstrip("/")
         for url in sitemap_urls:
+            if not (url == expected_origin or url.startswith(expected_origin + "/")):
+                errors.append(f"sitemap URL uses the wrong origin: {url}")
             target = route_file(url)
             if target is None:
                 errors.append(f"sitemap route has no generated file: {url}")
             elif target not in public_files:
                 public_files.append(target)
+
+        robots = OUT / "robots.txt"
+        if not robots.is_file():
+            errors.append("_site/robots.txt is missing")
+        else:
+            robots_text = robots.read_text(encoding="utf-8", errors="ignore")
+            expected_sitemap = expected_origin + "/sitemap.xml"
+            if f"Sitemap: {expected_sitemap}" not in robots_text:
+                errors.append(f"robots.txt does not point to {expected_sitemap}")
+            if re.search(r"^Disallow:\\s*/\\s*$", robots_text, re.M | re.I):
+                errors.append("robots.txt blocks the whole site")
 
     for page in public_files:
         text = page.read_text(encoding="utf-8", errors="ignore")
