@@ -93,6 +93,16 @@ for src in list(calc_dir.glob("*.html")):
     else:
         text = text.replace("</head>", f'<link rel="canonical" href="{clean_url}"></head>', 1)
     text = re.sub(r'<meta property="og:url" content="[^"]+">', f'<meta property="og:url" content="{clean_url}">', text)
+    visible_text = re.sub(r"<script\\b.*?</script>|<style\\b.*?</style>", " ", text, flags=re.S | re.I)
+    visible_text = re.sub(r"<[^>]+>", " ", visible_text)
+    if len(visible_text.split()) < 150:
+        title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
+        description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
+        page_title = html.unescape(title_match.group(1)).strip() if title_match else slug.replace("-", " ").title()
+        page_title = re.sub(r"\\s*\\|\\s*RenoMetric$", "", page_title).strip()
+        page_description = html.unescape(description_match.group(1)).strip() if description_match else "Use the measured project dimensions and the visible assumptions to create an early planning estimate."
+        enrichment = f'''<section class="section"><div class="wrap"><article class="article"><span class="tag">Practical planning notes</span><h2>How to use this {html.escape(page_title)}</h2><p>{html.escape(page_description)} Start with the actual dimensions or load values from the project, keep the units consistent, and change the default assumptions when the product label or supplier sheet gives you a more accurate value.</p><h2>What the estimate does and does not include</h2><p>This page is for early material planning. The result can change with openings, layout, cuts, waste, product yield, density, packaging, access, installation method and site conditions. It does not replace structural design, permitted drawings, manufacturer instructions or a contractor quotation.</p><h2>Worked planning example</h2><p>For a simple project, enter one measured section first and review the result. If the shape is irregular, split it into smaller sections, calculate each section, and add the quantities before applying whole-bag, box, bundle or delivery rounding.</p><h2>Before you order</h2><ul><li>Re-check the field measurements and the unit labels.</li><li>Replace generic coverage, yield, density or spacing assumptions with the exact product data.</li><li>Confirm package size, minimum order, delivery, tax and local requirements with the supplier.</li></ul></article></div></section>'''
+        text = text.replace("</main>", enrichment + "</main>", 1)
     if "application/ld+json" not in text:
         title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
         description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
