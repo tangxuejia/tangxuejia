@@ -53,3 +53,43 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+
+  live-indexing-smoke:
+    if: github.event_name != 'pull_request'
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check robots.txt and sitemap.xml as Googlebot
+        env:
+          LIVE_ORIGIN: https://renometric.pages.dev
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            --user-agent "Googlebot/2.1 (+http://www.google.com/bot.html)" \
+            "$LIVE_ORIGIN/robots.txt" > /tmp/robots.txt
+          grep -Fq "Sitemap: $LIVE_ORIGIN/sitemap.xml" /tmp/robots.txt
+          curl --fail --silent --show-error --location \
+            --user-agent "Googlebot/2.1 (+http://www.google.com/bot.html)" \
+            "$LIVE_ORIGIN/sitemap.xml" > /tmp/sitemap.xml
+          python3 - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          origin = os.environ["LIVE_ORIGIN"]
+          robots = Path("/tmp/robots.txt").read_text(encoding="utf-8")
+          sitemap = Path("/tmp/sitemap.xml").read_text(encoding="utf-8")
+          root = ET.fromstring(sitemap)
+          urls = [
+              node.text.strip()
+              for node in root.findall("{http://www.sitemaps.org/schemas/sitemap/0.9}url/{http://www.sitemaps.org/schemas/sitemap/0.9}loc")
+              if node.text and node.text.strip()
+          ]
+          if root.tag != "{http://www.sitemaps.org/schemas/sitemap/0.9}urlset":
+              raise SystemExit("sitemap root is not urlset")
+          if len(urls) < 200:
+              raise SystemExit(f"sitemap unexpectedly contains only {len(urls)} URLs")
+          if any(url != origin and not url.startswith(origin + "/") for url in urls):
+              raise SystemExit("sitemap contains a non-official origin")
+          print(f"Live indexing smoke passed: {len(urls)} sitemap URLs")
+          PY
