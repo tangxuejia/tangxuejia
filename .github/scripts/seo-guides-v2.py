@@ -5,7 +5,7 @@ def seo_guides() -> list[dict]:
         {
             "slug": "how-to-calculate-concrete-driveway-material",
             "title": "How to Calculate Concrete for a Driveway",
-            "category": "Concrete & Masonry", "topic": "concrete", "parent": "concrete-driveway",
+            "category": "Concrete & Masonry", "topic": "concrete", "parent": "concrete-driveway-calculator",
             "description": "Estimate driveway concrete volume from length, width and slab thickness before requesting supplier quotes.",
             "answer": "Multiply driveway length by width by thickness in feet, then divide by 27 to convert cubic feet to cubic yards. Split irregular driveways into measurable sections.",
             "steps": [("Measure each section.", "Use feet and separate rectangular areas."), ("Convert thickness.", "Divide inches by 12."), ("Calculate volume.", "Multiply length × width × thickness."), ("Convert and review.", "Divide by 27, then confirm allowance and ordering requirements.")],
