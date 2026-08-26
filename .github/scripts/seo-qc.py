@@ -76,7 +76,7 @@ else:
                 continue
             if parsed.netloc and parsed.netloc not in ("renometric.pages.dev", "tangxuejia.github.io"):
                 continue
-            target = route_file(f"{ORIGIN}{parsed.path or '/'}")
+            target = route_file(href)
             if target is None:
                 errors.append(f"{page}: broken internal link {href}")
 
