@@ -8,7 +8,7 @@ from urllib.parse import unquote, urlsplit
 
 OUT = Path("_site")
 BASE = os.environ.get("RENOMETRIC_BASE", "/tangxuejia")
-ORIGIN = os.environ.get("RENOMETRIC_ORIGIN", "https://tangxuejia.github.io/tangxuejia")
+ORIGIN = os.environ.get("RENOMETRIC_ORIGIN", "https://renometric.pages.dev")
 errors: list[str] = []
 
 
