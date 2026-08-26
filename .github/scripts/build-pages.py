@@ -126,6 +126,24 @@ for src in list(calc_dir.glob("*.html")):
     clean.mkdir(exist_ok=True)
     shutil.copy2(src, clean / "index.html")
 
+calculator_cards = []
+for src in sorted(calc_dir.glob("*.html")):
+    text = src.read_text(encoding="utf-8", errors="ignore")
+    title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
+    description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
+    title = html.unescape(title_match.group(1)).strip() if title_match else src.stem.replace("-", " ").title()
+    description = html.unescape(description_match.group(1)).strip() if description_match else "Use measured project dimensions to create an early planning estimate."
+    calculator_cards.append(f'<article class="card"><a href="{BASE}/calculators/{src.stem}"><span class="tag">Calculator</span><h3>{html.escape(title)}</h3><p>{html.escape(description)}</p></a></article>')
+calculator_schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Construction and Renovation Calculators",
+    "description": "Browse RenoMetric calculators for concrete, flooring, paint, landscaping, roofing, decks, fences, plumbing, electrical and HVAC planning.",
+    "url": f"{ORIGIN}/calculators",
+}
+calculators_index = OUT / "calculators" / "index.html"
+calculators_index.write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Construction &amp; Renovation Calculators | RenoMetric</title><meta name="description" content="Browse free construction and renovation calculators for concrete, flooring, paint, landscaping, roofing, decks, fences, plumbing, electrical and HVAC planning."><link rel="canonical" href="{ORIGIN}/calculators"><meta name="robots" content="index,follow"><link rel="stylesheet" href="{BASE}/assets/styles.css"><script type="application/ld+json">{json.dumps(calculator_schema, separators=(",", ":"))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{BASE}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{BASE}/calculators">Calculators</a><a href="{BASE}/guides/">Guides</a><a href="{BASE}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">RenoMetric tools</span><h1>Construction &amp; Renovation Calculators</h1><p>Choose a calculator, enter your measured dimensions, and review the formula, assumptions and ordering notes before you buy materials.</p></div></section><section class="section"><div class="wrap"><div class="grid">{"".join(calculator_cards)}</div><article class="article"><h2>How to use the calculator library</h2><p>Start with the project closest to your work, use consistent units, replace generic coverage or density assumptions with the product data, and keep the result as a planning estimate until site conditions and supplier requirements are confirmed.</p><p class="note"><b>Planning only:</b> final quantities can change with measurements, waste, product specifications, installation method and local requirements.</p></article></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Transparent home-improvement planning tools and guides.</p></div></footer></body></html>''', encoding="utf-8")
+
 guides_dir = OUT / "guides"
 guides_dir.mkdir(exist_ok=True)
 guide_pages: list[dict] = []
@@ -283,6 +301,7 @@ for page_path in OUT.rglob("*.html"):
 urls = [f"{ORIGIN}/"]
 urls.extend(f"{ORIGIN}/{slug}" for slug in ("about", "methodology", "privacy", "terms", "contact"))
 urls.extend(f"{ORIGIN}/topics/{slug}" for slug in TOPICS)
+urls.append(f"{ORIGIN}/calculators")
 urls.append(f"{ORIGIN}/guides")
 urls.extend(f"{ORIGIN}/guides/{g['slug']}" for g in guide_pages)
 urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")))
