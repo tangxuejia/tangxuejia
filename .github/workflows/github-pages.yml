@@ -28,7 +28,7 @@ jobs:
       - name: Build GitHub Pages artifact
         env:
           RENOMETRIC_BASE: /tangxuejia
-          RENOMETRIC_ORIGIN: https://tangxuejia.github.io/tangxuejia
+          RENOMETRIC_ORIGIN: https://renometric.pages.dev
         run: python3 .github/scripts/build-pages.py
 
       - name: Run SEO quality checks
