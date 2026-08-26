@@ -8,18 +8,51 @@ from urllib.parse import unquote, urlsplit
 
 OUT = Path("_site")
 BASE = os.environ.get("RENOMETRIC_BASE", "/tangxuejia")
+ORIGIN = os.environ.get("RENOMETRIC_ORIGIN", "https://tangxuejia.github.io/tangxuejia")
 errors: list[str] = []
+
+
+def route_file(url: str) -> Path | None:
+    path = unquote(urlsplit(url).path or "/")
+    origin_base = urlsplit(ORIGIN).path.rstrip("/")
+    if origin_base and (path == origin_base or path.startswith(origin_base + "/")):
+        path = path[len(origin_base):] or "/"
+    elif BASE and (path == BASE or path.startswith(BASE + "/")):
+        path = path[len(BASE):] or "/"
+
+    rel = path.lstrip("/")
+    if path == "/":
+        candidates = [OUT / "index.html"]
+    elif path.endswith("/"):
+        candidates = [OUT / rel / "index.html"]
+    elif path.endswith(".html"):
+        candidates = [OUT / rel]
+    else:
+        candidates = [OUT / rel / "index.html", OUT / (rel + ".html")]
+    return next((candidate for candidate in candidates if candidate.is_file()), None)
+
 
 if not OUT.exists():
     errors.append("_site directory is missing")
 else:
-    html_files = sorted(OUT.rglob("*.html"))
-    if not html_files:
-        errors.append("no HTML pages were generated")
+    sitemap = OUT / "sitemap.xml"
+    if not sitemap.is_file():
+        errors.append("_site/sitemap.xml is missing")
+        public_files: list[Path] = []
+    else:
+        sitemap_text = sitemap.read_text(encoding="utf-8", errors="ignore")
+        sitemap_urls = re.findall(r"<loc>(.*?)</loc>", sitemap_text)
+        if not sitemap_urls:
+            errors.append("sitemap contains no URLs")
+        public_files = []
+        for url in sitemap_urls:
+            target = route_file(url)
+            if target is None:
+                errors.append(f"sitemap route has no generated file: {url}")
+            elif target not in public_files:
+                public_files.append(target)
 
-    for page in html_files:
-        if page.name in {"404.html", "calculator.html"}:
-            continue
+    for page in public_files:
         text = page.read_text(encoding="utf-8", errors="ignore")
         title = re.search(r"<title[^>]*>.*?</title>", text, re.S | re.I)
         description = re.search(r'<meta\s+name=["\']description["\']\s+content=["\'][^"\']+["\']', text, re.S | re.I)
@@ -43,22 +76,8 @@ else:
                 continue
             if parsed.netloc and parsed.netloc not in ("renometric.pages.dev", "tangxuejia.github.io"):
                 continue
-
-            path = unquote(parsed.path or "/")
-            if BASE and (path == BASE or path.startswith(BASE + "/")):
-                path = path[len(BASE):] or "/"
-            if path == "/":
-                candidates = [OUT / "index.html"]
-            elif path.endswith("/"):
-                candidates = [OUT / path.lstrip("/") / "index.html"]
-            elif path.endswith(".html"):
-                candidates = [OUT / path.lstrip("/")]
-            else:
-                candidates = [
-                    OUT / path.lstrip("/") / "index.html",
-                    OUT / (path.lstrip("/") + ".html"),
-                ]
-            if not any(candidate.is_file() for candidate in candidates):
+            target = route_file(f"{ORIGIN}{parsed.path or '/'}")
+            if target is None:
                 errors.append(f"{page}: broken internal link {href}")
 
 if errors:
@@ -66,4 +85,4 @@ if errors:
     print("\n".join(f"- {item}" for item in errors))
     sys.exit(1)
 
-print(f"SEO QC passed: {len(list(OUT.rglob('*.html')))} HTML files checked")
+print(f"SEO QC passed: {len(public_files)} sitemap pages checked")
