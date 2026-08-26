@@ -15,7 +15,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: github-pages-${{ github.ref }}
+  group: github-pages-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
     if: github.event_name != 'pull_request'
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: \${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -65,42 +65,26 @@ jobs:
           LIVE_ORIGIN: https://renometric.pages.dev
         run: |
           set -euo pipefail
+          index=0
           for agent in \
             "Googlebot/2.1 (+http://www.google.com/bot.html)" \
             "Google-InspectionTool" \
             "Mozilla/5.0"; do
+            index=$((index + 1))
             echo "Testing user-agent: $agent"
             curl --fail --silent --show-error --location \
               --user-agent "$agent" \
-              --dump-header /tmp/headers.txt \
-              "$LIVE_ORIGIN/robots.txt" > /tmp/robots.txt
-            grep -Fq "Sitemap: $LIVE_ORIGIN/sitemap.xml" /tmp/robots.txt
-            grep -Eiq "^HTTP/.* 200" /tmp/headers.txt
+              --dump-header "/tmp/headers-\${index}.txt" \
+              "$LIVE_ORIGIN/robots.txt" > "/tmp/robots-\${index}.txt"
+            grep -Fq "Sitemap: $LIVE_ORIGIN/sitemap.xml" "/tmp/robots-\${index}.txt"
+            grep -Eiq "^HTTP/.* 200" "/tmp/headers-\${index}.txt"
             curl --fail --silent --show-error --location \
               --user-agent "$agent" \
-              --dump-header /tmp/headers.txt \
-              "$LIVE_ORIGIN/sitemap.xml" > /tmp/sitemap.xml
-            grep -Eiq "^HTTP/.* 200" /tmp/headers.txt
-            grep -Eiq "^content-type:.*(xml|text)" /tmp/headers.txt
-            python3 - <<'PY'
-          import os
-          import xml.etree.ElementTree as ET
-          from pathlib import Path
-          origin = os.environ["LIVE_ORIGIN"]
-          sitemap = Path("/tmp/sitemap.xml").read_text(encoding="utf-8")
-          root = ET.fromstring(sitemap)
-          urls = [
-              node.text.strip()
-              for node in root.findall("{http://www.sitemaps.org/schemas/sitemap/0.9}url/{http://www.sitemaps.org/schemas/sitemap/0.9}loc")
-              if node.text and node.text.strip()
-          ]
-          if root.tag != "{http://www.sitemaps.org/schemas/sitemap/0.9}urlset":
-              raise SystemExit("sitemap root is not urlset")
-          if len(urls) < 200:
-              raise SystemExit(f"sitemap unexpectedly contains only {len(urls)} URLs")
-          if any(url != origin and not url.startswith(origin + "/") for url in urls):
-              raise SystemExit("sitemap contains a non-official origin")
-          print(f"Parsed {len(urls)} URLs; content-type headers:")
-          print(Path("/tmp/headers.txt").read_text(encoding="utf-8"))
-            PY
+              --dump-header "/tmp/sitemap-headers-\${index}.txt" \
+              "$LIVE_ORIGIN/sitemap.xml" > "/tmp/sitemap-\${index}.xml"
+            grep -Eiq "^HTTP/.* 200" "/tmp/sitemap-headers-\${index}.txt"
+            grep -Eiq "^content-type:.*(xml|text)" "/tmp/sitemap-headers-\${index}.txt"
           done
+
+          python3 -c 'import os, xml.etree.ElementTree as ET; from pathlib import Path; origin=os.environ["LIVE_ORIGIN"]; ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"; path=Path("/tmp/sitemap-1.xml"); root=ET.parse(path).getroot(); urls=[node.text.strip() for node in root.findall(f"{ns}url/{ns}loc") if node.text and node.text.strip()]; assert root.tag == ns + "urlset", "sitemap root is not urlset"; assert len(urls) >= 200, f"sitemap unexpectedly contains only {len(urls)} URLs"; assert all(url == origin or url.startswith(origin + "/") for url in urls), "sitemap contains a non-official origin"; print(f"Parsed {len(urls)} URLs for all three user-agents")'
+          cat /tmp/sitemap-headers-1.txt
