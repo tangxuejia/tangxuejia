@@ -33,7 +33,7 @@ else:
         if re.search(r'href=["\'][^"\']*/guides/[^"\']+\.html(?:[?#][^"\']*)?["\']', text, re.I):
             errors.append(f"{page}: guide link contains .html")
 
-        for href in re.findall(r"<a\b[^>]+href=["']([^"']+)", text, re.I):
+        for href in re.findall(r'''<a\b[^>]+href=["']([^"']+)''', text, re.I):
             if href.startswith(("#", "mailto:", "tel:", "javascript:")):
                 continue
             parsed = urlsplit(href)
