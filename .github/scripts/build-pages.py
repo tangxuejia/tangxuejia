@@ -276,6 +276,7 @@ guide_index_schema = {"@context": "https://schema.org", "@type": "CollectionPage
 home = OUT / "index.html"
 if home.exists():
     text = home.read_text(encoding="utf-8")
+    text = text.replace(f'href="{BASE}/#calculators">Calculators', f'href="{BASE}/calculators">Calculators', 1)
     topic_cards = "".join(f'<article class="card"><a href="{BASE}/topics/{slug}"><span class="tag">Topic hub</span><h3>{html.escape(topic["title"])}</h3><p>{html.escape(topic["description"])}</p></a></article>' for slug, topic in TOPICS.items())
     planner_links = [("whole-house-renovation-planner", "Whole House Renovation Planner", "Combine flooring, paint, baseboard, purchase quantities and a starter budget for the whole house."),
         ("renovation-project-checklist", "Renovation Project Checklist", "Track measurements, quotes, purchasing, preparation, installation and final inspection."),
