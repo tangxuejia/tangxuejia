@@ -41,6 +41,10 @@ for page_path in OUT.rglob("*.html"):
     text = re.sub(r"src='/((?!tangxuejia/))", f"src='{BASE}/", text)
     if not BASE:
         text = text.replace('href="/tangxuejia/', 'href="/').replace("href='/tangxuejia/", "href='/").replace('src="/tangxuejia/', 'src="/').replace("src='/tangxuejia/", "src='/")
+    # Cloudflare serves the extensionless directory routes as canonical URLs.
+    # Keep calculator links on those routes so crawlers and users avoid an
+    # unnecessary .html redirect.
+    text = re.sub(r'(/calculators/[^"\'?#]+?)\.html(?=["\'/?#])', r'\1', text)
     text = text.replace('<form name="contact" method="POST"', '<form name="contact" method="POST" onsubmit="event.preventDefault();alert(\'Contact form is temporarily unavailable while RenoMetric is on its free preview host.\');"')
     page_path.write_text(text, encoding="utf-8")
 
@@ -133,6 +137,8 @@ for src in sorted(calc_dir.glob("*.html")):
     description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
     title = html.unescape(title_match.group(1)).strip() if title_match else src.stem.replace("-", " ").title()
     description = html.unescape(description_match.group(1)).strip() if description_match else "Use measured project dimensions to create an early planning estimate."
+    if src.stem == "index":
+        continue
     calculator_cards.append(f'<article class="card"><a href="{BASE}/calculators/{src.stem}"><span class="tag">Calculator</span><h3>{html.escape(title)}</h3><p>{html.escape(description)}</p></a></article>')
 calculator_schema = {
     "@context": "https://schema.org",
@@ -288,7 +294,7 @@ if home.exists():
     marker = '<section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">The RenoMetric standard</span>'
     if marker in text:
         text = text.replace(marker, section + marker, 1)
-    resource_count = len(list(calc_dir.glob("*.html"))) + len(guide_pages)
+    resource_count = len([p for p in calc_dir.glob("*.html") if p.stem != "index"]) + len(guide_pages)
     text = text.replace('<span><b>10</b> launch tools</span>', f'<span><b>{resource_count}</b> planning resources</span>')
     home.write_text(text, encoding="utf-8")
 
@@ -305,7 +311,7 @@ urls.extend(f"{ORIGIN}/topics/{slug}" for slug in TOPICS)
 urls.append(f"{ORIGIN}/calculators")
 urls.append(f"{ORIGIN}/guides")
 urls.extend(f"{ORIGIN}/guides/{g['slug']}" for g in guide_pages)
-urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")))
+urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")) if src.stem != "index")
 sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
 sitemap += "\n</urlset>\n"
@@ -313,4 +319,4 @@ sitemap += "\n</urlset>\n"
 
 (OUT / "404.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found — RenoMetric</title><link rel="icon" href="{BASE}/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{BASE}/assets/styles.css"></head><body><main class="section"><div class="wrap"><article class="article"><h1>Page not found</h1><p>The page may have moved.</p><p><a class="btn primary" href="{BASE}/">Back to RenoMetric</a></p></article></div></main></body></html>''', encoding="utf-8")
 
-print(f"Built GitHub Pages artifact at {OUT} with {len(list(calc_dir.glob('*.html')))} calculator/project pages, {len(guide_pages)} guides and {len(TOPICS)} topic hubs")
+print(f"Built GitHub Pages artifact at {OUT} with {len([p for p in calc_dir.glob('*.html') if p.stem != 'index'])} calculator/project pages, {len(guide_pages)} guides and {len(TOPICS)} topic hubs")
