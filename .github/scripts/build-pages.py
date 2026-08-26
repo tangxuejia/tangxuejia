@@ -93,6 +93,19 @@ for src in list(calc_dir.glob("*.html")):
     else:
         text = text.replace("</head>", f'<link rel="canonical" href="{clean_url}"></head>', 1)
     text = re.sub(r'<meta property="og:url" content="[^"]+">', f'<meta property="og:url" content="{clean_url}">', text)
+    if "application/ld+json" not in text:
+        title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
+        description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": html.unescape(title_match.group(1)).strip() if title_match else slug.replace("-", " ").title(),
+            "description": html.unescape(description_match.group(1)).strip() if description_match else "",
+            "url": clean_url,
+            "isPartOf": {"@type": "WebSite", "name": "RenoMetric", "url": f"{ORIGIN}/"},
+            "inLanguage": "en",
+        }
+        text = text.replace("</head>", f'<script type="application/ld+json">{json.dumps(schema, separators=(",", ":"))}</script></head>', 1)
     src.write_text(text, encoding="utf-8")
 
 for src in list(calc_dir.glob("*.html")):
