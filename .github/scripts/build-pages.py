@@ -121,6 +121,13 @@ if renderer:
 for slug in ("about", "methodology", "privacy", "terms", "contact"):
     src = OUT / f"{slug}.html"
     if src.exists():
+        clean_url = f"{ORIGIN}/{slug}"
+        for target in (src, OUT / slug / "index.html"):
+            if target.exists():
+                text = target.read_text(encoding="utf-8")
+                text = re.sub(r'<link rel="canonical" href="[^"]+">', f'<link rel="canonical" href="{clean_url}">', text, count=1)
+                text = re.sub(r'<meta property="og:url" content="[^"]+">', f'<meta property="og:url" content="{clean_url}">', text)
+                target.write_text(text, encoding="utf-8")
         clean = OUT / slug
         clean.mkdir(exist_ok=True)
         shutil.copy2(src, clean / "index.html")
