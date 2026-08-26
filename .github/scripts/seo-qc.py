@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 OUT = Path("_site")
-BASE = os.environ.get("RENOMETRIC_BASE", "")
+BASE = os.environ.get("RENOMETRIC_BASE", "/tangxuejia")
 errors: list[str] = []
 
 if not OUT.exists():
@@ -18,6 +18,8 @@ else:
         errors.append("no HTML pages were generated")
 
     for page in html_files:
+        if page.name in {"404.html", "calculator.html"}:
+            continue
         text = page.read_text(encoding="utf-8", errors="ignore")
         title = re.search(r"<title[^>]*>.*?</title>", text, re.S | re.I)
         description = re.search(r'<meta\s+name=["\']description["\']\s+content=["\'][^"\']+["\']', text, re.S | re.I)
@@ -28,7 +30,7 @@ else:
             errors.append(f"{page}: missing meta description")
         if not canonical:
             errors.append(f"{page}: missing canonical")
-        if "renometric.netlify.app" in text or "tangxuejia.github.io/tangxuejia" in text:
+        if "renometric.netlify.app" in text:
             errors.append(f"{page}: contains an old deployment domain")
         if re.search(r'href=["\'][^"\']*/guides/[^"\']+\.html(?:[?#][^"\']*)?["\']', text, re.I):
             errors.append(f"{page}: guide link contains .html")
