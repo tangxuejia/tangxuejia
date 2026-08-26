@@ -65,19 +65,28 @@ jobs:
           LIVE_ORIGIN: https://renometric.pages.dev
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location \
-            --user-agent "Googlebot/2.1 (+http://www.google.com/bot.html)" \
-            "$LIVE_ORIGIN/robots.txt" > /tmp/robots.txt
-          grep -Fq "Sitemap: $LIVE_ORIGIN/sitemap.xml" /tmp/robots.txt
-          curl --fail --silent --show-error --location \
-            --user-agent "Googlebot/2.1 (+http://www.google.com/bot.html)" \
-            "$LIVE_ORIGIN/sitemap.xml" > /tmp/sitemap.xml
-          python3 - <<'PY'
+          for agent in \
+            "Googlebot/2.1 (+http://www.google.com/bot.html)" \
+            "Google-InspectionTool" \
+            "Mozilla/5.0"; do
+            echo "Testing user-agent: $agent"
+            curl --fail --silent --show-error --location \
+              --user-agent "$agent" \
+              --dump-header /tmp/headers.txt \
+              "$LIVE_ORIGIN/robots.txt" > /tmp/robots.txt
+            grep -Fq "Sitemap: $LIVE_ORIGIN/sitemap.xml" /tmp/robots.txt
+            grep -Eiq "^HTTP/.* 200" /tmp/headers.txt
+            curl --fail --silent --show-error --location \
+              --user-agent "$agent" \
+              --dump-header /tmp/headers.txt \
+              "$LIVE_ORIGIN/sitemap.xml" > /tmp/sitemap.xml
+            grep -Eiq "^HTTP/.* 200" /tmp/headers.txt
+            grep -Eiq "^content-type:.*(xml|text)" /tmp/headers.txt
+            python3 - <<'PY'
           import os
           import xml.etree.ElementTree as ET
           from pathlib import Path
           origin = os.environ["LIVE_ORIGIN"]
-          robots = Path("/tmp/robots.txt").read_text(encoding="utf-8")
           sitemap = Path("/tmp/sitemap.xml").read_text(encoding="utf-8")
           root = ET.fromstring(sitemap)
           urls = [
@@ -91,5 +100,7 @@ jobs:
               raise SystemExit(f"sitemap unexpectedly contains only {len(urls)} URLs")
           if any(url != origin and not url.startswith(origin + "/") for url in urls):
               raise SystemExit("sitemap contains a non-official origin")
-          print(f"Live indexing smoke passed: {len(urls)} sitemap URLs")
-          PY
+          print(f"Parsed {len(urls)} URLs; content-type headers:")
+          print(Path("/tmp/headers.txt").read_text(encoding="utf-8"))
+            PY
+          done
