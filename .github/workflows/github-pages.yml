@@ -31,6 +31,9 @@ jobs:
           RENOMETRIC_ORIGIN: https://tangxuejia.github.io/tangxuejia
         run: python3 .github/scripts/build-pages.py
 
+      - name: Run SEO quality checks
+        run: python3 .github/scripts/seo-qc.py
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
