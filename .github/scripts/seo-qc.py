@@ -47,6 +47,8 @@ else:
         public_files = []
         expected_origin = ORIGIN.rstrip("/")
         for url in sitemap_urls:
+            if url.rstrip("/") == expected_origin + "/calculators/index":
+                errors.append("sitemap contains duplicate calculators/index route")
             if not (url == expected_origin or url.startswith(expected_origin + "/")):
                 errors.append(f"sitemap URL uses the wrong origin: {url}")
             target = route_file(url)
@@ -81,6 +83,8 @@ else:
             errors.append(f"{page}: contains an old deployment domain")
         if re.search(r'href=["\'][^"\']*/guides/[^"\']+\.html(?:[?#][^"\']*)?["\']', text, re.I):
             errors.append(f"{page}: guide link contains .html")
+        if re.search(r'href=["\'][^"\']*/calculators/[^"\']+\.html(?:[?#][^"\']*)?["\']', text, re.I):
+            errors.append(f"{page}: calculator link contains .html")
 
         for href in re.findall(r'''<a\b[^>]+href=["']([^"']+)''', text, re.I):
             if href.startswith(("#", "mailto:", "tel:", "javascript:")):
