@@ -74,16 +74,16 @@ jobs:
             echo "Testing user-agent: $agent"
             curl --fail --silent --show-error --location \
               --user-agent "$agent" \
-              --dump-header "/tmp/headers-\${index}.txt" \
-              "$LIVE_ORIGIN/robots.txt" > "/tmp/robots-\${index}.txt"
-            grep -Fq "Sitemap: $LIVE_ORIGIN/sitemap.xml" "/tmp/robots-\${index}.txt"
-            grep -Eiq "^HTTP/.* 200" "/tmp/headers-\${index}.txt"
+              --dump-header "/tmp/headers-${index}.txt" \
+              "$LIVE_ORIGIN/robots.txt" > "/tmp/robots-${index}.txt"
+            grep -Fq "Sitemap: $LIVE_ORIGIN/sitemap.xml" "/tmp/robots-${index}.txt"
+            grep -Eiq "^HTTP/.* 200" "/tmp/headers-${index}.txt"
             curl --fail --silent --show-error --location \
               --user-agent "$agent" \
-              --dump-header "/tmp/sitemap-headers-\${index}.txt" \
-              "$LIVE_ORIGIN/sitemap.xml" > "/tmp/sitemap-\${index}.xml"
-            grep -Eiq "^HTTP/.* 200" "/tmp/sitemap-headers-\${index}.txt"
-            grep -Eiq "^content-type:.*(xml|text)" "/tmp/sitemap-headers-\${index}.txt"
+              --dump-header "/tmp/sitemap-headers-${index}.txt" \
+              "$LIVE_ORIGIN/sitemap.xml" > "/tmp/sitemap-${index}.xml"
+            grep -Eiq "^HTTP/.* 200" "/tmp/sitemap-headers-${index}.txt"
+            grep -Eiq "^content-type:.*(xml|text)" "/tmp/sitemap-headers-${index}.txt"
           done
 
           python3 -c 'import os, xml.etree.ElementTree as ET; from pathlib import Path; origin=os.environ["LIVE_ORIGIN"]; ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"; path=Path("/tmp/sitemap-1.xml"); root=ET.parse(path).getroot(); urls=[node.text.strip() for node in root.findall(f"{ns}url/{ns}loc") if node.text and node.text.strip()]; assert root.tag == ns + "urlset", "sitemap root is not urlset"; assert len(urls) >= 200, f"sitemap unexpectedly contains only {len(urls)} URLs"; assert all(url == origin or url.startswith(origin + "/") for url in urls), "sitemap contains a non-official origin"; print(f"Parsed {len(urls)} URLs for all three user-agents")'
