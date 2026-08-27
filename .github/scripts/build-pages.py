@@ -134,6 +134,8 @@ for src in list(calc_dir.glob("*.html")):
                     "url": clean_url,
                     "isPartOf": {"@type": "WebSite", "name": "RenoMetric", "url": f"{ORIGIN}/"},
                     "inLanguage": "en",
+                    "dateModified": "2026-08-27",
+                    "author": {"@type": "Organization", "name": "RenoMetric"},
                 },
                 {
                     "@type": "WebApplication",
