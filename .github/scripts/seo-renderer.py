@@ -111,7 +111,7 @@ def render_planning_page(page: dict, base: str, origin: str) -> str:
                     {"@type": "ListItem", "position": 3, "name": title, "item": canonical},
                 ],
             },
-            _faq_schema(page["faqs"]),
+            _faq_schema(all_faqs),
         ],
     }
     uses = "".join(f"<li>{html.escape(x)}</li>" for x in page["uses"])
@@ -233,6 +233,52 @@ def _authority_section(page: dict, base: str) -> str:
     return f'<h2>Authority and verification</h2><p>RenoMetric provides transparent planning arithmetic, not a structural design or contractor quote. Verify final decisions with the current product label or supplier data, the applicable local requirements, and a qualified professional when the project is safety-critical.</p><ul><li><a href="{base}/methodology.html">RenoMetric methodology</a> — formulas, units and planning limitations.</li>{links}</ul>'
 
 
+def _decision_faqs(page: dict) -> list[tuple[str, str]]:
+    extra = {
+        "concrete-slab-bag-vs-ready-mix-guide": [
+            ("Does this estimate replace a contractor quote?", "No. It compares planning quantities and decision factors; confirm delivery, labor, access and final scope with the supplier or contractor."),
+            ("What product data should I verify before buying?", "Verify the exact bag yield, ready-mix minimum order, mix specification, delivery window and local project requirements."),
+        ],
+        "rebar-grid-quantity-planning-guide": [
+            ("Does this choose rebar size or spacing?", "No. Use the structural drawings or qualified design for bar size, spacing, cover, laps and placement."),
+            ("Does the result include purchase waste?", "It can include a visible lap or cutting allowance, but stock lengths and the actual cutting plan still need review."),
+        ],
+        "concrete-patio-cost-breakdown-guide": [
+            ("Does this include every patio cost?", "No. Separate demolition, excavation, base, forms, reinforcement, finishing, delivery, access, labor and permits."),
+            ("Why can two same-size patios cost differently?", "Site preparation, access, pumping, disposal and finishing requirements can differ substantially."),
+        ],
+        "flooring-box-coverage-and-waste-guide": [
+            ("Is the result net flooring or boxes to buy?", "The purchase estimate adds the chosen waste allowance and rounds up to complete cartons."),
+            ("Should I use the listing coverage or carton label?", "Use the current product carton or manufacturer specification for the exact coverage."),
+        ],
+        "room-paint-two-coats-guide": [
+            ("Does this include primer?", "Treat primer as a separate product and coat when the surface or product system requires it."),
+            ("Will texture change the gallons needed?", "Yes. Texture, porosity, color change and application method can reduce practical coverage."),
+        ],
+        "mulch-bag-coverage-by-depth-guide": [
+            ("Is the answer based on bag weight?", "No. Use the labeled volume per bag; weight does not reliably indicate coverage."),
+            ("Does this choose the correct mulch depth?", "No. Choose depth based on plants, drainage and landscape conditions."),
+        ],
+        "roof-area-pitch-measurement-guide": [
+            ("Does this calculate every roofing material?", "It estimates surface area; starter, ridge, flashing, valleys and penetrations should be listed separately."),
+            ("Can I measure a roof safely myself?", "Use plans or ground measurements when possible and do not access a roof without proper safety equipment."),
+        ],
+        "deck-board-linear-feet-guide": [
+            ("Does this include stairs and borders?", "The main field should be calculated separately from stairs, borders and picture framing."),
+            ("Does this size the deck framing?", "No. Joists, spans, ledger details and footings require separate structural planning."),
+        ],
+        "fence-gate-post-estimate-guide": [
+            ("Does a heavy gate need stronger posts?", "Often yes; gate width, weight, hardware, wind and soil affect post and footing requirements."),
+            ("Does this determine footing depth?", "No. Confirm embedment, concrete and local requirements for the fence system and site."),
+        ],
+        "concrete-driveway-gravel-base-guide": [
+            ("Is the result compacted or delivered volume?", "The calculation starts with compacted volume; confirm the supplier's allowance for loose delivered material."),
+            ("Does this design the driveway base?", "No. Soil, drainage, climate and vehicle loads determine the required base design."),
+        ],
+    }
+    return extra.get(page.get("slug"), [])
+
+
 def render_guide(page: dict, base: str, origin: str) -> str:
     title = page["title"]
     description = page["description"]
@@ -241,9 +287,10 @@ def render_guide(page: dict, base: str, origin: str) -> str:
     steps_html = "".join(
         f'<li><b>{html.escape(step[0])}</b> {html.escape(step[1])}</li>' for step in page["steps"]
     )
+    all_faqs = page["faqs"] + _decision_faqs(page)
     faq_html = "".join(
         f'<div class="faq"><h3>{html.escape(q)}</h3><p>{html.escape(a)}</p></div>'
-        for q, a in page["faqs"]
+        for q, a in all_faqs
     )
     decision_html = _decision_table(page)
     authority_html = _authority_section(page, base)
