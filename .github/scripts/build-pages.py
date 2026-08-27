@@ -99,6 +99,14 @@ for src in list(calc_dir.glob("*.html")):
     text = re.sub(r'<meta property="og:url" content="[^"]+">', f'<meta property="og:url" content="{clean_url}">', text)
     visible_text = re.sub(r"<script\b.*?</script>|<style\b.*?</style>", " ", text, flags=re.S | re.I)
     visible_text = re.sub(r"<[^>]+>", " ", visible_text)
+    if "Quick answer" not in visible_text and re.search(r"</h1>", text, re.I):
+        answer_title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
+        answer_description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
+        answer_title = html.unescape(answer_title_match.group(1)).strip() if answer_title_match else slug.replace("-", " ").title()
+        answer_title = re.sub(r"\s*\|\s*RenoMetric$", "", answer_title).strip()
+        answer_description = html.unescape(answer_description_match.group(1)).strip() if answer_description_match else "Use measured project dimensions to create an early planning estimate."
+        answer_block = f'<div id="renometric-answer" class="note" style="margin:18px 0"><b>Quick answer:</b> {html.escape(answer_description)} Start with actual measurements, use the product label for coverage or yield, and treat the result as a planning estimate until site conditions and supplier requirements are confirmed.</div>'
+        text = re.sub(r"</h1>", "</h1>" + answer_block, text, count=1, flags=re.I)
     if len(visible_text.split()) < 150:
         title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
         description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
@@ -115,12 +123,33 @@ for src in list(calc_dir.glob("*.html")):
         description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
         schema = {
             "@context": "https://schema.org",
-            "@type": "WebPage",
-            "name": html.unescape(title_match.group(1)).strip() if title_match else slug.replace("-", " ").title(),
-            "description": html.unescape(description_match.group(1)).strip() if description_match else "",
-            "url": clean_url,
-            "isPartOf": {"@type": "WebSite", "name": "RenoMetric", "url": f"{ORIGIN}/"},
-            "inLanguage": "en",
+            "@graph": [
+                {
+                    "@type": "WebPage",
+                    "name": html.unescape(title_match.group(1)).strip() if title_match else slug.replace("-", " ").title(),
+                    "description": html.unescape(description_match.group(1)).strip() if description_match else "",
+                    "url": clean_url,
+                    "isPartOf": {"@type": "WebSite", "name": "RenoMetric", "url": f"{ORIGIN}/"},
+                    "inLanguage": "en",
+                },
+                {
+                    "@type": "WebApplication",
+                    "name": html.unescape(title_match.group(1)).strip() if title_match else slug.replace("-", " ").title(),
+                    "description": html.unescape(description_match.group(1)).strip() if description_match else "",
+                    "url": clean_url,
+                    "applicationCategory": "UtilitiesApplication",
+                    "operatingSystem": "Any",
+                    "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+                },
+                {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        {"@type": "ListItem", "position": 1, "name": "RenoMetric", "item": f"{ORIGIN}/"},
+                        {"@type": "ListItem", "position": 2, "name": "Calculators", "item": f"{ORIGIN}/calculators"},
+                        {"@type": "ListItem", "position": 3, "name": html.unescape(title_match.group(1)).strip() if title_match else slug.replace("-", " ").title(), "item": clean_url},
+                    ],
+                },
+            ],
         }
         text = text.replace("</head>", f'<script type="application/ld+json">{json.dumps(schema, separators=(",", ":"))}</script></head>', 1)
     src.write_text(text, encoding="utf-8")
@@ -257,6 +286,40 @@ TOPICS = {
     },
 }
 
+# Connect every calculator to its topic hub and a small set of related tools.
+for src in sorted(calc_dir.glob("*.html")):
+    slug = src.stem
+    if slug == "index":
+        continue
+    topic_slug, topic = next(
+        (
+            (candidate_slug, candidate)
+            for candidate_slug, candidate in TOPICS.items()
+            if any(item_slug == slug for item_slug, _ in candidate["links"])
+        ),
+        (None, None),
+    )
+    if not topic_slug:
+        continue
+    text = src.read_text(encoding="utf-8", errors="ignore")
+    if 'id="renometric-related"' in text:
+        continue
+    related_items = [(item_slug, title) for item_slug, title in topic["links"] if item_slug != slug][:5]
+    related_cards = "".join(
+        f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Related tool</span><h3>{html.escape(title)}</h3><p>Use this RenoMetric tool for the same project area.</p></a></article>'
+        for item_slug, title in related_items
+    )
+    hub_card = f'<article class="card"><a href="{BASE}/topics/{topic_slug}"><span class="tag">Topic hub</span><h3>{html.escape(topic["title"])}</h3><p>Browse the full calculator and guide cluster.</p></a></article>'
+    related_html = f'<section class="section" id="renometric-related"><div class="wrap"><article class="article"><span class="tag">Related planning tools</span><h2>Continue planning</h2><p>Explore the related tools in this project area, then verify the assumptions and product data before ordering.</p><div class="grid">{hub_card}{related_cards}</div></article></div></section>'
+    if "</main>" in text:
+        text = text.replace("</main>", related_html + "</main>", 1)
+    else:
+        text = text.replace("</body>", related_html + "</body>", 1)
+    src.write_text(text, encoding="utf-8")
+    clean = calc_dir / slug
+    clean.mkdir(exist_ok=True)
+    shutil.copy2(src, clean / "index.html")
+
 def render_topic(slug: str, topic: dict) -> str:
     canonical = f"{ORIGIN}/topics/{slug}"
     project_cards = "".join(f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Project page</span><h3>{html.escape(title)}</h3><p>Open the RenoMetric resource for this project.</p></a></article>' for item_slug, title in topic["links"])
@@ -297,6 +360,16 @@ if home.exists():
     resource_count = len([p for p in calc_dir.glob("*.html") if p.stem != "index"]) + len(guide_pages)
     text = text.replace('<span><b>10</b> launch tools</span>', f'<span><b>{resource_count}</b> planning resources</span>')
     home.write_text(text, encoding="utf-8")
+    if '"@type":"Organization"' not in text:
+        organization_schema = {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "RenoMetric",
+            "url": f"{ORIGIN}/",
+            "description": "Transparent home-improvement and construction planning calculators.",
+        }
+        text = text.replace("</head>", f'<script type="application/ld+json">{json.dumps(organization_schema, separators=(",", ":"))}</script></head>', 1)
+        home.write_text(text, encoding="utf-8")
 
 favicon_href = f"{BASE}/favicon.svg"
 for page_path in OUT.rglob("*.html"):
@@ -315,7 +388,30 @@ urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("
 sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
 sitemap += "\n</urlset>\n"
-(OUT / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+
+# Keep a flat public index for AI assistants and retrieval systems.
+llms_lines = [
+    "# RenoMetric — full public resource index",
+    "",
+    "> Use the most specific calculator or guide for the user's measurements. Results are planning estimates, not engineering designs or contractor quotes.",
+    "",
+    "## Calculators",
+]
+for src in sorted(calc_dir.glob("*.html")):
+    if src.stem == "index":
+        continue
+    page_text = src.read_text(encoding="utf-8", errors="ignore")
+    title_match = re.search(r"<title>(.*?)</title>", page_text, re.S | re.I)
+    description_match = re.search(r'<meta name="description" content="([^"]*)"', page_text, re.S | re.I)
+    item_title = html.unescape(title_match.group(1)).strip() if title_match else src.stem.replace("-", " ").title()
+    item_title = re.sub(r"\s*\|\s*RenoMetric$", "", item_title).strip()
+    item_description = html.unescape(description_match.group(1)).strip() if description_match else "Use measured project dimensions for an early planning estimate."
+    llms_lines.append(f"- [{item_title}]({ORIGIN}/calculators/{src.stem}): {item_description}")
+llms_lines.extend(["", "## Guides"])
+for guide in guide_pages:
+    llms_lines.append(f'- [{guide["title"]}]({ORIGIN}/guides/{guide["slug"]}): {guide["description"]}')
+(OUT / "llms-full.txt").write_text("\n".join(llms_lines) + "\n", encoding="utf-8")
+
 
 (OUT / "404.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found — RenoMetric</title><link rel="icon" href="{BASE}/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{BASE}/assets/styles.css"></head><body><main class="section"><div class="wrap"><article class="article"><h1>Page not found</h1><p>The page may have moved.</p><p><a class="btn primary" href="{BASE}/">Back to RenoMetric</a></p></article></div></main></body></html>''', encoding="utf-8")
 
