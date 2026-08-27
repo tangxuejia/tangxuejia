@@ -107,6 +107,9 @@ for src in list(calc_dir.glob("*.html")):
         answer_description = html.unescape(answer_description_match.group(1)).strip() if answer_description_match else "Use measured project dimensions to create an early planning estimate."
         answer_block = f'<div id="renometric-answer" class="note" style="margin:18px 0"><b>Quick answer:</b> {html.escape(answer_description)} Start with actual measurements, use the product label for coverage or yield, and treat the result as a planning estimate until site conditions and supplier requirements are confirmed.</div>'
         text = re.sub(r"</h1>", "</h1>" + answer_block, text, count=1, flags=re.I)
+    if 'id="renometric-decision-promise"' not in text and "What you will get" not in text and re.search(r"</h1>", text, re.I):
+        decision_block = """<div id="renometric-decision-promise" class="article" style="margin:16px 0;background:#eef4f0;border:1px solid #cfe2d7;border-radius:12px"><h2>What you will get</h2><div class="grid"><div><b>1. Needed</b><p>See the estimated project quantity from your measurements.</p></div><div><b>2. Buy</b><p>Add waste and round to complete bags, boxes, cans, bundles or delivery quantities.</p></div><div><b>3. Check</b><p>Review product coverage, site conditions, local requirements and supplier details before ordering.</p></div></div></div>"""
+        text = re.sub(r"</h1>", "</h1>" + decision_block, text, count=1, flags=re.I)
     if len(visible_text.split()) < 150:
         title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
         description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
