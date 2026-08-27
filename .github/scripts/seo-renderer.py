@@ -189,6 +189,50 @@ def _decision_table(page: dict) -> str:
     return f"""<h2>Decision guide</h2><div style="overflow-x:auto"><table><thead><tr><th>Decision point</th><th>What the estimate tells you</th><th>What to verify</th></tr></thead><tbody>{body}</tbody></table></div>"""
 
 
+def _authority_section(page: dict, base: str) -> str:
+    source_map = {
+        "concrete-slab-bag-vs-ready-mix-guide": [
+            ("American Concrete Institute (ACI)", "https://www.concrete.org/", "Concrete and reinforcement design guidance."),
+            ("National Ready Mixed Concrete Association (NRMCA)", "https://www.nrmca.org/", "Ready-mix concrete and industry information."),
+        ],
+        "rebar-grid-quantity-planning-guide": [
+            ("American Concrete Institute (ACI)", "https://www.concrete.org/", "Concrete and reinforcement design guidance."),
+        ],
+        "concrete-patio-cost-breakdown-guide": [
+            ("American Concrete Institute (ACI)", "https://www.concrete.org/", "Concrete and reinforcement design guidance."),
+            ("National Ready Mixed Concrete Association (NRMCA)", "https://www.nrmca.org/", "Ready-mix concrete and industry information."),
+        ],
+        "flooring-box-coverage-and-waste-guide": [
+            ("National Wood Flooring Association (NWFA)", "https://woodfloors.org/", "Wood-flooring installation and care information."),
+            ("Tile Council of North America (TCNA)", "https://www.tcnatile.com/", "Tile installation and standards information."),
+        ],
+        "room-paint-two-coats-guide": [
+            ("U.S. Environmental Protection Agency — Safer Choice", "https://www.epa.gov/saferchoice", "Product and ingredient information for safer cleaning and coating choices."),
+        ],
+        "mulch-bag-coverage-by-depth-guide": [
+            ("USDA Natural Resources Conservation Service (NRCS)", "https://www.nrcs.usda.gov/", "Soil, drainage and conservation information."),
+        ],
+        "roof-area-pitch-measurement-guide": [
+            ("National Roofing Contractors Association (NRCA)", "https://www.nrca.net/", "Roofing practice and contractor guidance."),
+        ],
+        "deck-board-linear-feet-guide": [
+            ("American Wood Council (AWC)", "https://awc.org/", "Wood construction and span guidance."),
+        ],
+        "fence-gate-post-estimate-guide": [
+            ("International Code Council (ICC)", "https://www.iccsafe.org/", "Model-code and building-safety information."),
+        ],
+        "concrete-driveway-gravel-base-guide": [
+            ("Federal Highway Administration (FHWA)", "https://highways.dot.gov/", "Transportation, pavement and ground-condition resources."),
+        ],
+    }
+    sources = source_map.get(page.get("slug"), [])
+    links = "".join(
+        f'<li><a href="{url}" rel="noopener noreferrer">{html.escape(name)}</a> — {html.escape(note)}</li>'
+        for name, url, note in sources
+    )
+    return f'<h2>Authority and verification</h2><p>RenoMetric provides transparent planning arithmetic, not a structural design or contractor quote. Verify final decisions with the current product label or supplier data, the applicable local requirements, and a qualified professional when the project is safety-critical.</p><ul><li><a href="{base}/methodology.html">RenoMetric methodology</a> — formulas, units and planning limitations.</li>{links}</ul>'
+
+
 def render_guide(page: dict, base: str, origin: str) -> str:
     title = page["title"]
     description = page["description"]
@@ -202,6 +246,7 @@ def render_guide(page: dict, base: str, origin: str) -> str:
         for q, a in page["faqs"]
     )
     decision_html = _decision_table(page)
+    authority_html = _authority_section(page, base)
     schema = {
         "@context": "https://schema.org",
         "@graph": [
@@ -224,4 +269,4 @@ def render_guide(page: dict, base: str, origin: str) -> str:
             _faq_schema(page["faqs"]),
         ],
     }
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} | RenoMetric</title><meta name="description" content="{html.escape(description)}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><meta property="og:title" content="{html.escape(title)} | RenoMetric"><meta property="og:description" content="{html.escape(description)}"><meta property="og:type" content="article"><meta property="og:url" content="{canonical}"><link rel="stylesheet" href="{base}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{base}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{base}/calculators">Calculators</a><a href="{base}/guides/">Guides</a><a href="{base}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">{html.escape(page['category'])} guide</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(title)}</h1><p>{html.escape(description)}</p></div></section><section class="section"><div class="wrap"><article class="article"><h2>Quick answer</h2><p>{html.escape(page['answer'])}</p><p><a class="btn primary" href="{parent_url}">Use the related calculator</a></p><h2>Step by step</h2><ol>{steps_html}</ol><h2>Formula or rule of thumb</h2><div class="formula">{html.escape(page['formula'])}</div><h2>Example</h2><p>{html.escape(page['example'])}</p><h2>Common mistakes</h2><p>{html.escape(page['mistakes'])}</p><p class="note"><b>Planning note:</b> product yields, installation methods, site conditions and local requirements can change the final quantity. Use the exact manufacturer or supplier information before purchasing.</p>{decision_html}<h2>FAQ</h2>{faq_html}<h2>Related tool</h2><p><a class="pill" href="{parent_url}">Open the related calculator</a> <a class="pill" href="{base}/guides/">Browse all guides</a></p></article></div></section></main>{_footer(base)}</body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} | RenoMetric</title><meta name="description" content="{html.escape(description)}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><meta property="og:title" content="{html.escape(title)} | RenoMetric"><meta property="og:description" content="{html.escape(description)}"><meta property="og:type" content="article"><meta property="og:url" content="{canonical}"><link rel="stylesheet" href="{base}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{base}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{base}/calculators">Calculators</a><a href="{base}/guides/">Guides</a><a href="{base}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">{html.escape(page['category'])} guide</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(title)}</h1><p>{html.escape(description)}</p></div></section><section class="section"><div class="wrap"><article class="article"><h2>Quick answer</h2><p>{html.escape(page['answer'])}</p><p><a class="btn primary" href="{parent_url}">Use the related calculator</a></p><h2>Step by step</h2><ol>{steps_html}</ol><h2>Formula or rule of thumb</h2><div class="formula">{html.escape(page['formula'])}</div><h2>Example</h2><p>{html.escape(page['example'])}</p><h2>Common mistakes</h2><p>{html.escape(page['mistakes'])}</p><p class="note"><b>Planning note:</b> product yields, installation methods, site conditions and local requirements can change the final quantity. Use the exact manufacturer or supplier information before purchasing.</p>{decision_html}{authority_html}<h2>FAQ</h2>{faq_html}<h2>Related tool</h2><p><a class="pill" href="{parent_url}">Open the related calculator</a> <a class="pill" href="{base}/guides/">Browse all guides</a></p></article></div></section></main>{_footer(base)}</body></html>'''
