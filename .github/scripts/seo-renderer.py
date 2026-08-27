@@ -124,6 +124,71 @@ def render_planning_page(page: dict, base: str, origin: str) -> str:
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} | RenoMetric</title><meta name="description" content="{html.escape(description)}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><meta property="og:title" content="{html.escape(title)} | RenoMetric"><meta property="og:description" content="{html.escape(description)}"><meta property="og:type" content="website"><meta property="og:url" content="{canonical}"><link rel="stylesheet" href="{base}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{base}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{base}/calculators">Calculators</a><a href="{base}/methodology.html">Methodology</a><a href="{base}/about.html">About</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">{html.escape(page['category'])}</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(title)}</h1><p>{html.escape(description)}</p><div class="pill-row"><span class="pill">Planning guide</span><span class="pill">No sign-up</span><span class="pill">Transparent assumptions</span></div></div></section><section class="section"><div class="wrap"><article class="article"><span class="tag">Start with real measurements</span><h2>Quick answer</h2><p>{html.escape(description)} Use the working RenoMetric calculator below for the actual estimate, then use this page to check assumptions, package rounding and project-specific considerations.</p>{tool}{actions}<p><a class="btn primary" href="{parent_url}">Open the working {html.escape(page['parent'].title())} calculator</a></p><h2>Formula</h2><div class="formula">{html.escape(page['formula'])}</div><h2>Worked planning example</h2><p>{html.escape(page['example'])}</p><h2>Common uses</h2><ul>{uses}</ul><h2>How to get a better estimate</h2><p>Measure the actual project rather than relying on listing dimensions. For irregular spaces, split the surface into simple measurable sections and add the results. Use the exact product label for package coverage, yield, density or square-foot coverage whenever it is available.</p><p>Keep waste and package rounding as separate steps. Waste covers cuts, breakage, pattern matching and unavoidable offcuts. Package rounding reflects the fact that many materials are sold only in complete bags, boxes, bundles or cans.</p><p class="note"><b>Before you buy:</b> this page is a planning guide, not a contractor quotation or structural design. Verify final quantities with the product manufacturer, supplier or installer when project conditions could materially change the result.</p><h2>{html.escape(title)} FAQ</h2>{faqs}<h2>Use the calculator</h2><p><a class="pill" href="{parent_url}">Open {html.escape(page['parent'].title())} Calculator</a> <a class="pill" href="{base}/calculators">Browse all RenoMetric calculators</a></p></article></div></section></main>{_footer(base)}<script src=\"{base}/assets/workspace.js\" defer></script></body></html>'''
 
 
+def _decision_table(page: dict) -> str:
+    rows_by_slug = {
+        "concrete-slab-bag-vs-ready-mix-guide": [
+            ("Project volume", "Small, accessible pours may suit bags; larger or continuous pours usually suit ready-mix.", "Confirm exact volume, supplier minimums and truck access."),
+            ("Labor and placement", "Bagged concrete needs repeated mixing and enough people to place and finish it.", "Protect the finishing window and plan water, mixing and cleanup."),
+            ("True cost", "Compare delivered concrete, labor, equipment, delivery and waste—not just bag price.", "Use local supplier pricing and the actual site constraints."),
+        ],
+        "rebar-grid-quantity-planning-guide": [
+            ("Grid layout", "Count bars in both directions across the usable span.", "Confirm bar size, spacing, cover and laps from the design."),
+            ("Purchase quantity", "Add cutting and lap allowance, then round to stock lengths.", "Check the stock lengths actually sold by the supplier."),
+            ("Structural decision", "A quantity estimate does not choose reinforcement design.", "Use structural drawings or qualified design guidance."),
+        ],
+        "concrete-patio-cost-breakdown-guide": [
+            ("Scope", "Separate concrete, base, forms, reinforcement, finishing and labor.", "Make demolition, disposal and permits visible line items."),
+            ("Access", "Truck access, pumping and hand placement can change the installed cost.", "Ask contractors to price the same access assumptions."),
+            ("Site preparation", "Excavation, drainage and weak subgrade can outweigh the concrete material cost.", "Confirm existing conditions before comparing quotes."),
+        ],
+        "flooring-box-coverage-and-waste-guide": [
+            ("Net area", "Measure every area receiving the same product and remove only fixed exclusions.", "Keep closets, transitions and stairs in the installation scope."),
+            ("Layout waste", "Simple rectangles need less allowance than patterns, angles or many cuts.", "Use the installer’s cut plan and the product return policy."),
+            ("Carton coverage", "Divide planned square footage by the exact carton coverage and round up.", "Read the current carton label rather than a listing headline."),
+        ],
+        "room-paint-two-coats-guide": [
+            ("Paintable area", "Use wall and ceiling surface area, subtracting meaningful openings.", "Do not use floor area as a substitute for wall area."),
+            ("Coats and coverage", "Multiply by the planned coats, then divide by the exact product coverage.", "Separate primer and ceiling products when they differ."),
+            ("Surface condition", "Texture, color changes and application method affect actual coverage.", "Allow for touch-up and the product manufacturer’s guidance."),
+        ],
+        "mulch-bag-coverage-by-depth-guide": [
+            ("Bed area", "Split irregular beds into simple measurable sections.", "Measure the actual planted area rather than guessing from the property size."),
+            ("Installed depth", "Convert inches to feet before calculating cubic feet.", "Use a depth appropriate for plants, drainage and existing mulch."),
+            ("Bag size", "Divide volume by the labeled bag volume and round up.", "Check settling and the current bag label."),
+        ],
+        "roof-area-pitch-measurement-guide": [
+            ("Roof geometry", "Calculate each roof plane and apply its correct pitch factor.", "Separate additions, porches, dormers, hips and valleys."),
+            ("Ordering", "Convert surface area to squares or bundles using the product label.", "Add starter, ridge, flashing and other accessories separately."),
+            ("Safety", "A ground or plan-based estimate is safer than an unsafe roof measurement.", "Use proper equipment or a qualified professional for difficult roofs."),
+        ],
+        "deck-board-linear-feet-guide": [
+            ("Board module", "Use actual face width plus the installation gap to count rows.", "Follow the selected manufacturer’s spacing instructions."),
+            ("Project zones", "Calculate the main field, stairs, borders and picture framing separately.", "Do not assume all offcuts can be reused."),
+            ("Stock lengths", "Round the plan to boards that are actually available.", "Review cuts, joins and waste before purchasing."),
+        ],
+        "fence-gate-post-estimate-guide": [
+            ("Gate layout", "A typical gate opening needs two dedicated gate posts.", "Check the actual gate system, hinge and latch layout."),
+            ("Post loading", "Heavy, wide or wind-exposed gates may need stronger posts and footings.", "Do not substitute ordinary line posts without verification."),
+            ("Footings", "Fence length alone does not determine footing design.", "Confirm soil, embedment, concrete and local requirements."),
+        ],
+        "concrete-driveway-gravel-base-guide": [
+            ("Compacted depth", "Calculate area times the specified compacted base depth.", "Do not use concrete thickness as a substitute for base depth."),
+            ("Delivered volume", "Loose delivered aggregate can exceed the compacted volume.", "Ask the supplier how compaction and allowance are represented."),
+            ("Site condition", "Soil, drainage, climate and vehicle loads affect the base requirement.", "Confirm the specification before ordering material."),
+        ],
+    }
+    rows = rows_by_slug.get(page.get("slug"), [
+        ("Measurements", "Start with accurate project dimensions and the correct units.", "Replace generic assumptions with site measurements."),
+        ("Product data", "Use the actual package yield, coverage or density.", "Check the current manufacturer or supplier label."),
+        ("Final decision", "Treat the result as an early planning estimate.", "Confirm final quantities and requirements before purchase."),
+    ])
+    body = "".join(
+        f"<tr><th scope=\"row\">{html.escape(label)}</th><td>{html.escape(guidance)}</td><td>{html.escape(verify)}</td></tr>"
+        for label, guidance, verify in rows
+    )
+    return f"""<h2>Decision guide</h2><div style="overflow-x:auto"><table><thead><tr><th>Decision point</th><th>What the estimate tells you</th><th>What to verify</th></tr></thead><tbody>{body}</tbody></table></div>"""
+
+
 def render_guide(page: dict, base: str, origin: str) -> str:
     title = page["title"]
     description = page["description"]
@@ -136,6 +201,7 @@ def render_guide(page: dict, base: str, origin: str) -> str:
         f'<div class="faq"><h3>{html.escape(q)}</h3><p>{html.escape(a)}</p></div>'
         for q, a in page["faqs"]
     )
+    decision_html = _decision_table(page)
     schema = {
         "@context": "https://schema.org",
         "@graph": [
@@ -158,4 +224,4 @@ def render_guide(page: dict, base: str, origin: str) -> str:
             _faq_schema(page["faqs"]),
         ],
     }
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} | RenoMetric</title><meta name="description" content="{html.escape(description)}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><meta property="og:title" content="{html.escape(title)} | RenoMetric"><meta property="og:description" content="{html.escape(description)}"><meta property="og:type" content="article"><meta property="og:url" content="{canonical}"><link rel="stylesheet" href="{base}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{base}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{base}/calculators">Calculators</a><a href="{base}/guides/">Guides</a><a href="{base}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">{html.escape(page['category'])} guide</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(title)}</h1><p>{html.escape(description)}</p></div></section><section class="section"><div class="wrap"><article class="article"><h2>Quick answer</h2><p>{html.escape(page['answer'])}</p><p><a class="btn primary" href="{parent_url}">Use the related calculator</a></p><h2>Step by step</h2><ol>{steps_html}</ol><h2>Formula or rule of thumb</h2><div class="formula">{html.escape(page['formula'])}</div><h2>Example</h2><p>{html.escape(page['example'])}</p><h2>Common mistakes</h2><p>{html.escape(page['mistakes'])}</p><p class="note"><b>Planning note:</b> product yields, installation methods, site conditions and local requirements can change the final quantity. Use the exact manufacturer or supplier information before purchasing.</p><h2>FAQ</h2>{faq_html}<h2>Related tool</h2><p><a class="pill" href="{parent_url}">Open the related calculator</a> <a class="pill" href="{base}/guides/">Browse all guides</a></p></article></div></section></main>{_footer(base)}</body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} | RenoMetric</title><meta name="description" content="{html.escape(description)}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><meta property="og:title" content="{html.escape(title)} | RenoMetric"><meta property="og:description" content="{html.escape(description)}"><meta property="og:type" content="article"><meta property="og:url" content="{canonical}"><link rel="stylesheet" href="{base}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{base}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{base}/calculators">Calculators</a><a href="{base}/guides/">Guides</a><a href="{base}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">{html.escape(page['category'])} guide</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(title)}</h1><p>{html.escape(description)}</p></div></section><section class="section"><div class="wrap"><article class="article"><h2>Quick answer</h2><p>{html.escape(page['answer'])}</p><p><a class="btn primary" href="{parent_url}">Use the related calculator</a></p><h2>Step by step</h2><ol>{steps_html}</ol><h2>Formula or rule of thumb</h2><div class="formula">{html.escape(page['formula'])}</div><h2>Example</h2><p>{html.escape(page['example'])}</p><h2>Common mistakes</h2><p>{html.escape(page['mistakes'])}</p><p class="note"><b>Planning note:</b> product yields, installation methods, site conditions and local requirements can change the final quantity. Use the exact manufacturer or supplier information before purchasing.</p>{decision_html}<h2>FAQ</h2>{faq_html}<h2>Related tool</h2><p><a class="pill" href="{parent_url}">Open the related calculator</a> <a class="pill" href="{base}/guides/">Browse all guides</a></p></article></div></section></main>{_footer(base)}</body></html>'''
