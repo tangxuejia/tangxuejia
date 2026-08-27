@@ -99,6 +99,8 @@ def render_planning_page(page: dict, base: str, origin: str) -> str:
                 "description": description,
                 "url": canonical,
                 "isPartOf": {"@type": "WebSite", "name": "RenoMetric", "url": f"{origin}/"},
+                "dateModified": "2026-08-27",
+                "author": {"@type": "Organization", "name": "RenoMetric"},
             },
             {
                 "@type": "WebApplication",
@@ -310,6 +312,7 @@ def render_guide(page: dict, base: str, origin: str) -> str:
                 "mainEntityOfPage": canonical,
                 "author": {"@type": "Organization", "name": "RenoMetric"},
                 "publisher": {"@type": "Organization", "name": "RenoMetric"},
+                "dateModified": "2026-08-27",
             },
             {
                 "@type": "BreadcrumbList",
