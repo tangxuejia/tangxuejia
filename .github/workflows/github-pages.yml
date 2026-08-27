@@ -88,3 +88,35 @@ jobs:
 
           python3 -c 'import os, xml.etree.ElementTree as ET; from pathlib import Path; origin=os.environ["LIVE_ORIGIN"]; ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"; path=Path("/tmp/sitemap-1.xml"); root=ET.parse(path).getroot(); urls=[node.text.strip() for node in root.findall(f"{ns}url/{ns}loc") if node.text and node.text.strip()]; assert root.tag == ns + "urlset", "sitemap root is not urlset"; assert len(urls) >= 200, f"sitemap unexpectedly contains only {len(urls)} URLs"; assert all(url == origin or url.startswith(origin + "/") for url in urls), "sitemap contains a non-official origin"; print(f"Parsed {len(urls)} URLs for all three user-agents")'
           cat /tmp/sitemap-headers-1.txt
+
+      - name: Notify Bing and participating search engines through IndexNow
+        continue-on-error: true
+        env:
+          LIVE_ORIGIN: https://renometric.pages.dev
+          INDEXNOW_KEY: 66f970a4ae695942e61a5b002d075c62
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from urllib.request import Request, urlopen
+
+          origin = os.environ["LIVE_ORIGIN"].rstrip("/")
+          sitemap = urlopen(origin + "/sitemap.xml", timeout=30).read().decode("utf-8")
+          urls = re.findall(r"<loc>(.*?)</loc>", sitemap)
+          urls = [url.strip() for url in urls if url.strip()]
+          payload = json.dumps({
+              "host": origin.replace("https://", ""),
+              "key": os.environ["INDEXNOW_KEY"],
+              "keyLocation": f"{origin}/{os.environ['INDEXNOW_KEY']}.txt",
+              "urlList": urls,
+          }).encode("utf-8")
+          request = Request(
+              "https://api.indexnow.org/indexnow",
+              data=payload,
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST",
+          )
+          with urlopen(request, timeout=30) as response:
+              print(f"IndexNow notified {len(urls)} URLs; HTTP {response.status}")
+          PY
