@@ -81,7 +81,7 @@ app = OUT / "assets" / "app.js"
 if app.exists():
     text = app.read_text(encoding="utf-8")
     text = text.replace("https://renometric.netlify.app", ORIGIN)
-    text = text.replace("location.replace('/#calculators')", f"location.replace('{BASE}/#calculators')")
+    text = text.replace("location.replace('/#calculators')", f"location.replace('{BASE}/calculators')")
     text = text.replace('href="/calculators/', f'href="{BASE}/calculators/')
     app.write_text(text, encoding="utf-8")
 
