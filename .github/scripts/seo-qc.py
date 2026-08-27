@@ -68,6 +68,28 @@ else:
             if re.search(r"^Disallow:\\s*/\\s*$", robots_text, re.M | re.I):
                 errors.append("robots.txt blocks the whole site")
 
+    if len(sitemap_urls) < 200:
+        errors.append(f"sitemap contains only {len(sitemap_urls)} URLs; expected the public resource library")
+
+    llms = OUT / "llms.txt"
+    if not llms.is_file():
+        errors.append("_site/llms.txt is missing")
+    else:
+        llms_text = llms.read_text(encoding="utf-8", errors="ignore")
+        if "https://renometric.pages.dev/" not in llms_text or "/calculators" not in llms_text or "/guides" not in llms_text:
+            errors.append("_site/llms.txt is missing official resource links")
+
+    if not (OUT / "llms-full.txt").is_file():
+        errors.append("_site/llms-full.txt is missing")
+
+    homepage = route_file(expected_origin + "/")
+    if homepage is not None:
+        homepage_text = homepage.read_text(encoding="utf-8", errors="ignore")
+        if '"@type":"Organization"' not in homepage_text:
+            errors.append(f"{homepage}: missing RenoMetric Organization schema")
+
+    seen_titles: dict[str, Path] = {}
+    seen_descriptions: dict[str, Path] = {}
     for page in public_files:
         text = page.read_text(encoding="utf-8", errors="ignore")
         title = re.search(r"<title[^>]*>.*?</title>", text, re.S | re.I)
@@ -75,6 +97,19 @@ else:
         canonical = re.search(r'<link\s+rel=["\']canonical["\']\s+href=["\'][^"\']+["\']', text, re.S | re.I)
         if not title:
             errors.append(f"{page}: missing title")
+        if title:
+            title_value = re.sub(r"<[^>]+>", "", title.group(0)).strip()
+            if title_value in seen_titles:
+                errors.append(f"{page}: duplicate title also used by {seen_titles[title_value]}")
+            else:
+                seen_titles[title_value] = page
+        description_match = re.search(r'<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)["\']', text, re.S | re.I)
+        if description_match:
+            description_value = description_match.group(1).strip()
+            if description_value in seen_descriptions:
+                errors.append(f"{page}: duplicate meta description also used by {seen_descriptions[description_value]}")
+            else:
+                seen_descriptions[description_value] = page
         if not description:
             errors.append(f"{page}: missing meta description")
         if not canonical:
