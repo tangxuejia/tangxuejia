@@ -267,6 +267,10 @@ TOPICS = {
             ("rebar-weight-calculator", "Rebar Weight Calculator"),
             ("concrete-yield-calculator", "Concrete Yield Calculator"),
             ("cmu-mortar-calculator", "CMU Mortar Calculator"),
+            ("deck-mud-calculator", "Deck Mud Calculator"),
+            ("floor-mud-calculator", "Floor Mud Calculator"),
+            ("tuckpointing-calculator", "Tuckpointing Calculator"),
+            ("concrete-screed-calculator", "Concrete Screed Calculator"),
         ],
     },
     "flooring": {
@@ -276,7 +280,7 @@ TOPICS = {
             ("whole-house-renovation-planner", "Whole House Renovation Planner"),
             ("room-renovation-planner", "Room Renovation Planner"),
             ("kitchen-renovation-planner", "Kitchen Renovation Planner"),
-            ("bathroom-renovation-planner", "Bathroom Renovation Planner"), ("tile", "Tile Calculator"), ("flooring-cost-calculator", "Flooring Cost Calculator"), ("laminate-flooring-calculator", "Laminate Flooring Calculator"), ("vinyl-flooring-calculator", "Vinyl Flooring Calculator"), ("hardwood-flooring-calculator", "Hardwood Flooring Calculator"), ("carpet-calculator", "Carpet Calculator"), ("room-flooring-calculator", "Room Flooring Calculator"), ("flooring-box-calculator", "Flooring Box Calculator"), ("bathroom-tile-calculator", "Bathroom Tile Calculator"), ("kitchen-tile-calculator", "Kitchen Tile Calculator")],
+            ("bathroom-renovation-planner", "Bathroom Renovation Planner"), ("tile", "Tile Calculator"), ("flooring-cost-calculator", "Flooring Cost Calculator"), ("laminate-flooring-calculator", "Laminate Flooring Calculator"), ("vinyl-flooring-calculator", "Vinyl Flooring Calculator"), ("hardwood-flooring-calculator", "Hardwood Flooring Calculator"), ("carpet-calculator", "Carpet Calculator"), ("room-flooring-calculator", "Room Flooring Calculator"), ("flooring-box-calculator", "Flooring Box Calculator"), ("bathroom-tile-calculator", "Bathroom Tile Calculator"), ("kitchen-tile-calculator", "Kitchen Tile Calculator"), ("marble-quantity-calculator", "Marble Quantity Calculator"), ("self-leveling-calculator", "Self-Leveling Underlayment Calculator")],
     },
     "paint": {
         "title": "Paint Calculators & Guides",
