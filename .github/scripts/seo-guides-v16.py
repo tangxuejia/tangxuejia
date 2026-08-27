@@ -120,7 +120,7 @@ def seo_guides() -> list[dict]:
         },
         {
             "slug": "mulch-bag-coverage-by-depth-guide",
-            "title": "How Many Bags of Mulch Do I Need?",
+            "title": "Mulch Bag Coverage: How Many Bags Do I Need?",
             "category": "Landscaping",
             "topic": "landscaping",
             "parent": "mulch-calculator",
