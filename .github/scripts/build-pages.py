@@ -57,6 +57,11 @@ for item in ROOT.iterdir():
 
 for page_path in OUT.rglob("*.html"):
     text = page_path.read_text(encoding="utf-8")
+    relative_parts = page_path.relative_to(OUT).parts
+    if relative_parts and relative_parts[0].startswith("kos-"):
+        text = re.sub(r'<meta name="robots" content="[^"]*">', '<meta name="robots" content="noindex,nofollow">', text, count=1)
+        if '<meta name="robots"' not in text:
+            text = text.replace("</head>", '<meta name="robots" content="noindex,nofollow"></head>', 1)
     text = text.replace("https://renometric.netlify.app", ORIGIN)
     text = text.replace("https://tangxuejia.github.io/tangxuejia", ORIGIN)
     text = re.sub(r'href="/(?!tangxuejia/)', f'href="{BASE}/', text)
@@ -435,6 +440,16 @@ for page_path in OUT.rglob("*.html"):
     if 'rel="icon"' not in text:
         text = text.replace("</head>", f'<link rel="icon" href="{favicon_href}" type="image/svg+xml"></head>', 1)
     page_path.write_text(text, encoding="utf-8")
+
+# Cloudflare Pages serves the extensionless URLs as the preferred public routes.
+# Keep legacy .html files reachable, but consolidate them with permanent redirects.
+redirects = []
+for src in sorted(calc_dir.glob("*.html")):
+    if src.stem != "index":
+        redirects.append(f"/calculators/{src.stem}.html /calculators/{src.stem} 301")
+for slug in ("about", "methodology", "privacy", "terms", "contact"):
+    redirects.append(f"/{slug}.html /{slug} 301")
+(OUT / "_redirects").write_text("\n".join(redirects) + "\n", encoding="utf-8")
 
 urls = [f"{ORIGIN}/"]
 urls.extend(f"{ORIGIN}/{slug}" for slug in ("about", "methodology", "privacy", "terms", "contact"))
