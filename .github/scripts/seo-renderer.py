@@ -127,7 +127,7 @@ def render_planning_page(page: dict, base: str, origin: str) -> str:
                 "@type": "BreadcrumbList",
                 "itemListElement": [
                     {"@type": "ListItem", "position": 1, "name": "RenoMetric", "item": f"{origin}/"},
-                    {"@type": "ListItem", "position": 2, "name": "Calculators", "item": f"{origin}/#calculators"},
+                    {"@type": "ListItem", "position": 2, "name": "Calculators", "item": f"{origin}/calculators"},
                     {"@type": "ListItem", "position": 3, "name": title, "item": canonical},
                 ],
             },
