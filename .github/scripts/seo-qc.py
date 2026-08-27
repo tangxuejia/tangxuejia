@@ -98,16 +98,16 @@ else:
             if target is None:
                 errors.append(f"{page}: broken internal link {href}")
 
-        script_open_count = len(re.findall(r"<script\\b", text, re.I))
-        script_close_count = len(re.findall(r"</script\\s*>", text, re.I))
+        script_open_count = len(re.findall(r"<script\b", text, re.I))
+        script_close_count = len(re.findall(r"</script\s*>", text, re.I))
         if script_open_count != script_close_count:
             errors.append(f"{page}: unbalanced script tags ({script_open_count} open, {script_close_count} close)")
-        visible_text = re.sub(r"<script\\b[^>]*>.*?</script\\s*>", " ", text, flags=re.S | re.I)
-        visible_text = re.sub(r"<style\\b[^>]*>.*?</style\\s*>", " ", visible_text, flags=re.S | re.I)
+        visible_text = re.sub(r"<script\b[^>]*>.*?</script\s*>", " ", text, flags=re.S | re.I)
+        visible_text = re.sub(r"<style\b[^>]*>.*?</style\s*>", " ", visible_text, flags=re.S | re.I)
         visible_text = re.sub(r"<[^>]+>", " ", visible_text)
-        if re.search(r"\\bfunction\\s+(?:setUnit|copyPlan|saveProject)\\s*\\(", visible_text):
+        if re.search(r"\bfunction\s+(?:setUnit|copyPlan|saveProject)\s*\(", visible_text):
             errors.append(f"{page}: JavaScript function is visible as page text")
-        if re.search(r"\\bdocument\\.getElementById\\b|\\blocalStorage\\.(?:getItem|setItem)\\b", visible_text):
+        if re.search(r"\bdocument\.getElementById\b|\blocalStorage\.(?:getItem|setItem)\b", visible_text):
             errors.append(f"{page}: raw JavaScript expression is visible as page text")
 
 if errors:
