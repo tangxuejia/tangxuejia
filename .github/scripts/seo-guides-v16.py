@@ -33,7 +33,7 @@ def seo_guides() -> list[dict]:
             "topic": "concrete",
             "parent": "rebar-calculator",
             "description": "Estimate slab rebar bars, grid intersections, total length and stock bars from spacing, edge clearance and allowance.",
-            "answer": "A slab rebar estimate starts with two bar directions. Count bars across each usable dimension, multiply each count by the opposite span, add laps or cutting allowance, and then round to purchasable stock lengths.",
+            "answer": "Use two separate bar counts—one in each direction—to estimate a slab rebar grid; do not estimate it from slab area alone. Count bars across each usable span, multiply each count by its run length, add laps or cutting allowance, and round to purchasable stock lengths. Bar size, spacing and structural placement still come from the project design.",
             "steps": [
                 ("Confirm the layout", "Use the specified bar size, spacing, edge clearance, cover and lap rules from the plans."),
                 ("Count each direction", "Calculate bars across the usable width and usable length separately, including the end bar where required."),
@@ -56,7 +56,7 @@ def seo_guides() -> list[dict]:
             "topic": "concrete",
             "parent": "concrete-patio-calculator",
             "description": "Build a concrete patio estimate by separating concrete volume, base, reinforcement, forming, finishing, access and site work.",
-            "answer": "A patio budget is more reliable when material and labor are separated. Concrete volume is only one line item; demolition, excavation, base preparation, forms, reinforcement, finishing, joints, delivery and access can change the installed total.",
+            "answer": "A concrete patio budget is not just the concrete price. Separate concrete volume, demolition, excavation, base preparation, forms, reinforcement, finishing, joints, delivery, access and labor so the estimate reflects the installed job rather than one material line.",
             "steps": [
                 ("Measure the footprint", "Split the patio, steps, thickened edges and irregular sections into simple shapes."),
                 ("Calculate concrete", "Use the designed thickness and add a separate ordering allowance."),
@@ -79,7 +79,7 @@ def seo_guides() -> list[dict]:
             "topic": "flooring",
             "parent": "flooring-box-calculator",
             "description": "Calculate flooring boxes from measured area, carton coverage, layout waste and whole-box rounding.",
-            "answer": "Flooring boxes are calculated from the area that will actually receive the product, divided by the coverage printed on the carton. Add waste after measuring the complete layout and round up to whole boxes.",
+            "answer": "To find flooring boxes, multiply the net floor area by one plus the waste allowance, divide by the carton coverage, and round up to whole boxes. Measure every installation area first, then use the exact coverage printed on the product carton.",
             "steps": [
                 ("Measure the floor", "Calculate each room and add only areas that will receive the same flooring."),
                 ("Subtract fixed exclusions", "Remove permanent cabinets or untiled areas, but do not subtract movable furniture."),
@@ -102,7 +102,7 @@ def seo_guides() -> list[dict]:
             "topic": "paint",
             "parent": "room-paint-calculator",
             "description": "Estimate room paint for walls and ceilings by measuring surface area, subtracting openings and multiplying by coats.",
-            "answer": "Paint quantity depends on wall surface area, ceiling area, doors and windows, number of coats, texture and the product's coverage. Two coats means the paintable area is counted twice before dividing by coverage per gallon.",
+            "answer": "For two coats, multiply the paintable wall or ceiling area by two, divide by the product's coverage per gallon, and round up to whole containers. Subtract major openings and account for texture, primer, product coverage and any separate ceiling finish.",
             "steps": [
                 ("Measure the walls", "Add each wall length and multiply by wall height, or calculate each wall separately."),
                 ("Subtract major openings", "Remove large doors and windows while keeping small cuts and texture allowance realistic."),
@@ -125,7 +125,7 @@ def seo_guides() -> list[dict]:
             "topic": "landscaping",
             "parent": "mulch-calculator",
             "description": "Calculate mulch bags from landscape area, installed depth, bag volume and practical settling allowance.",
-            "answer": "Mulch quantity is area multiplied by the desired installed depth. Convert inches to feet, calculate cubic feet, divide by the volume printed on each bag and round up. Bag coverage varies by bag size and depth.",
+            "answer": "To estimate mulch bags, multiply the bed area by the desired depth in feet, divide the resulting cubic feet by the volume printed on each bag, and round up. Bag coverage changes with bag size, depth, settling and the actual landscape layout.",
             "steps": [
                 ("Measure the bed", "Split curved or irregular beds into simple sections and add their areas."),
                 ("Set the depth", "Choose a depth appropriate for the plants and existing conditions instead of copying one universal number."),
@@ -148,7 +148,7 @@ def seo_guides() -> list[dict]:
             "topic": "roofing-decks-fences",
             "parent": "roof-area-calculator",
             "description": "Estimate roof surface area by separating plan dimensions, pitch factors, roof planes and waste-producing features.",
-            "answer": "Roof area is larger than the horizontal footprint because slope adds surface length. Measure each roof plane, apply the correct pitch factor or slope geometry, add the planes and then account for valleys, hips, dormers and penetrations.",
+            "answer": "To estimate roof area with pitch, multiply each horizontal roof-plane area by its correct pitch factor, add all roof planes, and then allow for waste and accessories. The sloped surface is larger than the horizontal footprint, especially on complex roofs with hips, valleys, dormers and penetrations.",
             "steps": [
                 ("Map each plane", "Treat gables, hips, porches and additions as separate roof sections."),
                 ("Measure the plan area", "Use horizontal length and width for each section when the factor method applies."),
@@ -171,7 +171,7 @@ def seo_guides() -> list[dict]:
             "topic": "roofing-decks-fences",
             "parent": "deck-board-calculator",
             "description": "Estimate deck board count and linear feet from deck dimensions, board face width, gap, stock length and waste.",
-            "answer": "Deck board quantity depends on the actual face width plus the installation gap. Count the rows across the deck, multiply by the board run, then account for stairs, borders, picture framing and stock-length cuts.",
+            "answer": "To estimate deck boards, divide each deck width by the board face width plus the installation gap, round the row count up, and multiply by the board run. Then add separate quantities for stairs, borders, picture framing, stock-length cuts and realistic waste.",
             "steps": [
                 ("Measure each zone", "Separate the main field, stairs, landings, borders and picture-frame sections."),
                 ("Use actual module width", "Combine board face width and the required gap to calculate rows."),
@@ -194,7 +194,7 @@ def seo_guides() -> list[dict]:
             "topic": "roofing-decks-fences",
             "parent": "fence-post-calculator",
             "description": "Estimate line, corner and gate posts for a fence layout while keeping gate loads and footing requirements separate.",
-            "answer": "A gate normally needs dedicated posts on both sides of the opening, in addition to line and corner posts. Gate width, hardware, gate weight, wind exposure and soil conditions determine the required post and footing design.",
+            "answer": "Plan on two dedicated gate posts for a typical gate opening, in addition to line, end and corner posts. Gate width, hardware, gate weight, wind exposure and soil conditions determine whether those posts and their footings need a stronger design.",
             "steps": [
                 ("Draw the fence route", "Mark every end, corner, direction change, gate and change in height."),
                 ("Count ordinary sections", "Divide each straight run by the selected panel or post spacing and round up."),
@@ -217,7 +217,7 @@ def seo_guides() -> list[dict]:
             "topic": "concrete",
             "parent": "concrete-driveway-calculator",
             "description": "Estimate driveway gravel base volume from area and compacted depth while separating excavation, drainage and concrete quantities.",
-            "answer": "Driveway base quantity is calculated from the driveway area and the specified compacted base depth. The delivered loose volume can be greater than the compacted volume, and the correct depth depends on soil, drainage, climate and expected vehicle loads.",
+            "answer": "To estimate driveway gravel base, multiply the driveway area by the specified compacted base depth, convert the result to cubic yards, and then confirm the supplier's loose-volume allowance. The correct depth depends on soil, drainage, climate and expected vehicle loads.",
             "steps": [
                 ("Measure the driveway", "Calculate the main slab, apron, widening and turning areas separately."),
                 ("Confirm base depth", "Use the project specification or qualified site guidance rather than one generic depth."),
