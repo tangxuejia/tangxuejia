@@ -20,6 +20,30 @@ OUT.mkdir(parents=True)
 skip_top = {".git", ".github", ".netlify", "_site"}
 skip_files = {"_redirects", "_headers", "netlify.toml"}
 
+# High-intent pages get a page-specific decision profile instead of only a generic calculator template.
+core_profiles = {
+    "concrete": ("Slabs, patios, pads and small pours.", "Length, width, thickness, waste and the exact bag yield or supplier volume.", "Net volume, order volume, cubic yards and bag equivalents.", "Confirm subgrade, reinforcement, mix design, delivery access and finishing capacity."),
+    "concrete-bag-calculator": ("Small DIY pours where complete bag counts matter.", "Pour dimensions, waste and the yield printed on the selected bag.", "Required volume, bags to buy and the effect of package rounding.", "Do not use bag weight as yield; confirm mixing time, water and product instructions."),
+    "concrete-cost-calculator": ("An early material-cost comparison before requesting quotes.", "Concrete quantity, unit price, delivery, labor, preparation and contingency.", "A visible cost breakdown rather than one unexplained headline number.", "Local prices, access, demolition, pumping, permits and site preparation can dominate."),
+    "concrete-driveway-calculator": ("Driveway pours with separate thickness, base and access decisions.", "Driveway dimensions, designed thickness, waste, gravel base and delivery assumptions.", "Concrete quantity plus the planning items that affect the installed job.", "Confirm vehicle loads, drainage, base design, joints, reinforcement and local requirements."),
+    "concrete-slab-calculator": ("Rectangular slab volume and purchase planning.", "Slab length, width, thickness, waste and product yield.", "Raw volume, ordering allowance, cubic yards and package options.", "Thickness and reinforcement are design decisions; the calculator does not approve them."),
+    "rebar-calculator": ("A first-pass bar count for a specified slab or grid.", "Usable spans, bar spacing, edge clearance, stock length and allowance.", "Bars in each direction, grid length and a stock-purchase estimate.", "Use structural drawings for bar size, spacing, cover, laps and placement."),
+    "rebar-weight-calculator": ("Weight and handling planning after bar size and length are known.", "Bar size, count or length and the selected steel unit weight.", "Estimated total linear length and weight for transport or purchasing.", "Verify the bar designation, stock lengths, bundle limits and structural schedule."),
+    "flooring": ("Flooring coverage, waste and complete-carton planning.", "Every installation area, exclusions, layout waste and carton coverage.", "Net area, planned coverage, boxes and material cost.", "Read the current carton label; include closets, stairs, transitions and return-policy limits."),
+    "flooring-calculator": ("Quick flooring area and material planning across rooms.", "Room dimensions, fixed exclusions, waste and product coverage.", "Install area, purchase area and complete-package quantity.", "Measure each room separately when direction, pattern or product changes."),
+    "paint": ("Room-wall, ceiling and whole-house paint planning.", "Surface dimensions, openings, coats, product coverage and container size.", "Paintable area, gallons or containers and material cost.", "Primer, texture, surface porosity, color change and ceiling products may need separate estimates."),
+    "room-paint-calculator": ("A room-level estimate when wall area and coat count are the main questions.", "Wall height and lengths, major openings, coats and the exact coverage rate.", "Paintable area and rounded containers for the planned coats.", "Floor area is not wall area; verify primer and finish coverage separately."),
+    "gravel": ("Bulk gravel, driveway and landscape-bed ordering.", "Length, width, compacted depth, density, waste and price basis.", "Cubic yards, estimated weight or tons and an order estimate.", "Density, moisture, compaction, delivery minimums and spreading are supplier-specific."),
+    "mulch": ("Landscape-bed mulch volume and bag coverage.", "Bed area, installed depth and labeled bag volume.", "Cubic yards, cubic feet and complete bags.", "Choose depth for the plants and drainage; weight is not a substitute for labeled volume."),
+    "roofing": ("Simple roof surface, squares and shingle-bundle planning.", "Roof footprint or planes, pitch factor, waste and bundle coverage.", "Sloped area, roofing squares and field-shingle bundles.", "Starter, ridge, flashing, underlayment, ventilation and roof condition need separate checks."),
+    "roofing-calculator": ("A fast roofing quantity estimate before a supplier conversation.", "Roof length, width, pitch, waste and bundle coverage.", "Area and rounded field-shingle quantity.", "Complex hips, valleys, dormers and penetrations require separate plane and accessory measurements."),
+    "deck": ("Deck-board quantity planning for a main rectangular field.", "Deck dimensions, board face width, gap, stock length and waste.", "Rows, linear feet and a board purchase starting point.", "Stairs, borders, picture framing, fasteners and framing are separate quantities."),
+    "fence": ("Fence-run, section and post planning.", "Total run, gate openings, post spacing and extra corners or ends.", "Fence runs, sections and a preliminary post count.", "Gate posts, wind, soil, footing depth and local requirements need a separate design check."),
+    "renovation-cost-calculator": ("An early renovation budget before comparing contractor quotes.", "Rooms, material quantities, labor, delivery, disposal, permits and contingency.", "A separated budget with visible assumptions and missing-scope checks.", "Use quotes and site inspection for hidden conditions; do not treat the result as a fixed price."),
+    "whole-house-renovation-planner": ("Coordinating rooms, materials and a starter whole-house plan.", "Room dimensions, surfaces, product coverage, quantities and budget allowances.", "A project path that connects measurements, purchase quantities and budget lines.", "Sequence, permits, structural work, trade coordination and site conditions require professional review."),
+    "drywall-calculator": ("Wall and ceiling sheet, compound and screw planning.", "Surface area, sheet size, openings, waste and fastening assumptions.", "Sheets, joint compound and screws as separate purchase quantities.", "Fire ratings, moisture conditions, ceiling layout, framing and local requirements may change the specification."),
+}
+
 for item in ROOT.iterdir():
     if item.name in skip_top or item.name in skip_files:
         continue
@@ -110,6 +134,11 @@ for src in list(calc_dir.glob("*.html")):
     if 'id="renometric-decision-promise"' not in text and "What you will get" not in text and re.search(r"</h1>", text, re.I):
         decision_block = """<div id="renometric-decision-promise" class="article" style="margin:16px 0;background:#eef4f0;border:1px solid #cfe2d7;border-radius:12px"><h2>What you will get</h2><div class="grid"><div><b>1. Needed</b><p>See the estimated project quantity from your measurements.</p></div><div><b>2. Buy</b><p>Add waste and round to complete bags, boxes, cans, bundles or delivery quantities.</p></div><div><b>3. Check</b><p>Review product coverage, site conditions, local requirements and supplier details before ordering.</p></div></div></div>"""
         text = re.sub(r"</h1>", "</h1>" + decision_block, text, count=1, flags=re.I)
+    profile = core_profiles.get(slug)
+    if profile and 'id="renometric-core-profile"' not in text:
+        best_for, inputs, output, check = profile
+        profile_html = f'''<section id="renometric-core-profile" class="section"><div class="wrap"><article class="article" style="background:#f4f8f5;border:1px solid #cfe2d7;border-radius:12px"><span class="tag">Decision support</span><h2>What this tool helps you decide</h2><div class="grid"><div><b>Best for</b><p>{html.escape(best_for)}</p></div><div><b>Enter</b><p>{html.escape(inputs)}</p></div><div><b>You get</b><p>{html.escape(output)}</p></div><div><b>Check before buying</b><p>{html.escape(check)}</p></div></div></article></div></section>'''
+        text = re.sub(r"</h1>", "</h1>" + profile_html, text, count=1, flags=re.I)
     if len(visible_text.split()) < 150:
         title_match = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
         description_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
