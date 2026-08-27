@@ -82,6 +82,15 @@ else:
     if not (OUT / "llms-full.txt").is_file():
         errors.append("_site/llms-full.txt is missing")
 
+    redirects = OUT / "_redirects"
+    if not redirects.is_file():
+        errors.append("_site/_redirects is missing; duplicate .html routes are not consolidated")
+    else:
+        redirect_lines = [line for line in redirects.read_text(encoding="utf-8", errors="ignore").splitlines() if line.strip() and not line.lstrip().startswith("#")]
+        legacy_calculators = [p for p in (OUT / "calculators").glob("*.html") if p.stem != "index"]
+        if len([line for line in redirect_lines if " /calculators/" in line and line.endswith(" 301")]) < len(legacy_calculators):
+            errors.append("_site/_redirects does not cover every legacy calculator .html route")
+
     homepage = route_file(expected_origin + "/")
     if homepage is not None:
         homepage_text = homepage.read_text(encoding="utf-8", errors="ignore")
