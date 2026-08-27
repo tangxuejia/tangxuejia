@@ -274,6 +274,18 @@ TOPICS = {
             ("fence-post-calculator", "Fence Post Calculator"),
         ],
     },
+    "renovation": {
+        "title": "Renovation Planning Calculators & Guides",
+        "description": "Room-by-room renovation budgets, material takeoffs, project planning and buying checklists for home improvement work.",
+        "links": [
+            ("renovation-cost-calculator", "Renovation Cost Calculator"),
+            ("whole-house-renovation-planner", "Whole House Renovation Planner"),
+            ("room-renovation-planner", "Room Renovation Planner"),
+            ("kitchen-renovation-planner", "Kitchen Renovation Planner"),
+            ("bathroom-renovation-planner", "Bathroom Renovation Planner"),
+            ("renovation-project-checklist", "Renovation Project Checklist"),
+        ],
+    },
     "plumbing": {
         "title": "Plumbing & Drainage Calculators",
         "description": "Water-pipe flow, pipe sizing, pressure loss and drainage slope planning tools with practical installation guides.",
