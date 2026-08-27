@@ -300,7 +300,14 @@ for src in sorted(calc_dir.glob("*.html")):
         (None, None),
     )
     if not topic_slug:
-        continue
+        topic = {
+            "title": "RenoMetric Calculator Library",
+            "links": [
+                (item.stem, item.stem.replace("-", " ").title())
+                for item in sorted(calc_dir.glob("*.html"))
+                if item.stem not in ("index", slug)
+            ],
+        }
     text = src.read_text(encoding="utf-8", errors="ignore")
     if 'id="renometric-related"' in text:
         continue
@@ -309,7 +316,8 @@ for src in sorted(calc_dir.glob("*.html")):
         f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Related tool</span><h3>{html.escape(title)}</h3><p>Use this RenoMetric tool for the same project area.</p></a></article>'
         for item_slug, title in related_items
     )
-    hub_card = f'<article class="card"><a href="{BASE}/topics/{topic_slug}"><span class="tag">Topic hub</span><h3>{html.escape(topic["title"])}</h3><p>Browse the full calculator and guide cluster.</p></a></article>'
+    hub_url = f"{BASE}/topics/{topic_slug}" if topic_slug else f"{BASE}/calculators"
+    hub_card = f'<article class="card"><a href="{hub_url}"><span class="tag">Calculator library</span><h3>{html.escape(topic["title"])}</h3><p>Browse the full calculator and guide cluster.</p></a></article>'
     related_html = f'<section class="section" id="renometric-related"><div class="wrap"><article class="article"><span class="tag">Related planning tools</span><h2>Continue planning</h2><p>Explore the related tools in this project area, then verify the assumptions and product data before ordering.</p><div class="grid">{hub_card}{related_cards}</div></article></div></section>'
     if "</main>" in text:
         text = text.replace("</main>", related_html + "</main>", 1)
