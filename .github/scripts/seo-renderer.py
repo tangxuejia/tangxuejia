@@ -199,6 +199,32 @@ def _decision_table(page: dict) -> str:
 
 def _authority_section(page: dict, base: str) -> str:
     source_map = {
+        "how-to-read-concrete-bag-yield-label": [
+            ("American Concrete Institute (ACI)", "https://www.concrete.org/", "Concrete materials and placement guidance."),
+        ],
+        "concrete-ordering-delivery-minimum-guide": [
+            ("National Ready Mixed Concrete Association (NRMCA)", "https://www.nrmca.org/", "Ready-mix concrete and industry information."),
+        ],
+        "flooring-carton-coverage-ordering-guide": [
+            ("National Wood Flooring Association (NWFA)", "https://woodfloors.org/", "Wood-flooring installation and care information."),
+            ("Tile Council of North America (TCNA)", "https://www.tcnatile.com/", "Tile installation and standards information."),
+        ],
+        "paint-primer-vs-finish-quantity-guide": [
+            ("U.S. Environmental Protection Agency — Safer Choice", "https://www.epa.gov/saferchoice", "Product and ingredient information for safer coating choices."),
+        ],
+        "driveway-gravel-delivery-tonnage-guide": [
+            ("Federal Highway Administration (FHWA)", "https://highways.dot.gov/", "Transportation and pavement resources."),
+            ("USDA Natural Resources Conservation Service (NRCS)", "https://www.nrcs.usda.gov/", "Soil, drainage and conservation information."),
+        ],
+        "roofing-accessory-order-checklist": [
+            ("National Roofing Contractors Association (NRCA)", "https://www.nrca.net/", "Roofing practice and contractor guidance."),
+        ],
+        "rebar-stock-length-cutting-allowance-guide": [
+            ("American Concrete Institute (ACI)", "https://www.concrete.org/", "Concrete and reinforcement design guidance."),
+        ],
+        "renovation-material-takeoff-checklist": [
+            ("International Code Council (ICC)", "https://www.iccsafe.org/", "Building-safety and model-code information."),
+        ],
         "concrete-slab-bag-vs-ready-mix-guide": [
             ("American Concrete Institute (ACI)", "https://www.concrete.org/", "Concrete and reinforcement design guidance."),
             ("National Ready Mixed Concrete Association (NRMCA)", "https://www.nrmca.org/", "Ready-mix concrete and industry information."),
