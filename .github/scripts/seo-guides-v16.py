@@ -10,7 +10,7 @@ def seo_guides() -> list[dict]:
             "topic": "concrete",
             "parent": "concrete-slab-calculator",
             "description": "Compare bagged concrete with ready-mix for a slab by volume, labor, delivery, waste and practical ordering limits.",
-            "answer": "The choice between bags and ready-mix depends on the slab volume, access, available labor, placement time and finish requirements. Calculate the slab volume first, then compare the complete delivered cost rather than only the material price.",
+            "answer": "For most slabs that need a continuous pour or more than a small DIY volume, ready-mix is usually the better choice because it is faster and more consistent. Bagged concrete is usually better for a small, accessible, non-structural slab when you have enough labor and mixing time. Calculate the slab volume first, then compare delivered material, labor, access, placement, finishing and cleanup costs.",
             "steps": [
                 ("Measure the slab", "Calculate each rectangular section from length, width and designed thickness."),
                 ("Convert to cubic yards", "Divide cubic feet by 27 so the quantity can be compared with ready-mix ordering units."),
