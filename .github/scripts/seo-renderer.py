@@ -111,7 +111,7 @@ def render_planning_page(page: dict, base: str, origin: str) -> str:
                 "description": description,
                 "url": canonical,
                 "isPartOf": {"@type": "WebSite", "name": "RenoMetric", "url": f"{origin}/"},
-                "dateModified": "2026-08-27",
+                "dateModified": page.get("dateModified", "2026-08-27"),
                 "author": {"@type": "Organization", "name": "RenoMetric"},
             },
             {
