@@ -335,8 +335,8 @@ function markSensoryOutcome(id,outcome){let d=cd(),key=String(id);d.sensoryOutco
 const kosSensoryMissionHTML=sensoryMissionHTML;
 sensoryMissionHTML=function(id,grade){
   let base=kosSensoryMissionHTML(id,grade),key=String(id),d=cd(),x=(d.sensoryOutcomes||{})[key]||{};
-  let actions='<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px"><button class="gold" onclick="markSensoryOutcome(\\''+key+'\\',\\'done\\')">✅ 我完成了</button><button class="mini" onclick="markSensoryOutcome(\\''+key+'\\',\\'difficult\\')">🟡 有点困难</button><button class="mini" onclick="markSensoryOutcome(\\''+key+'\\',\\'skipped\\')">⚪ 今天先跳过</button></div><div class="small muted" style="margin-top:6px">本案记录：完成 '+Number(x.done||0)+' 次 · 困难 '+Number(x.difficult||0)+' 次 · 跳过 '+Number(x.skipped||0)+' 次</div></div>';
-  return base.replace(/<button class="gold"[^>]*>[\\s\\S]*?<\\/button><\\/div>$/,actions);
+  let actions=\`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px"><button class="gold" onclick="markSensoryOutcome('\${key}','done')">✅ 我完成了</button><button class="mini" onclick="markSensoryOutcome('\${key}','difficult')">🟡 有点困难</button><button class="mini" onclick="markSensoryOutcome('\${key}','skipped')">⚪ 今天先跳过</button></div><div class="small muted" style="margin-top:6px">本案记录：完成 \${Number(x.done||0)} 次 · 困难 \${Number(x.difficult||0)} 次 · 跳过 \${Number(x.skipped||0)} 次</div></div>\`;
+  return base.replace(/<button class="gold"[^>]*>[\s\S]*?<\/button><\/div>$/,actions);
 };
 touchCheckin();
 boot();
