@@ -424,6 +424,39 @@ for src in sorted(calc_dir.glob("*.html")):
 
 def render_topic(slug: str, topic: dict) -> str:
     canonical = f"{ORIGIN}/topics/{slug}"
+    topic_questions = {
+        "concrete": [
+            ("How much concrete do I need?", f"{BASE}/guides/how-many-bags-of-concrete-do-i-need", "Start with dimensions, thickness, waste and the product or supplier unit."),
+            ("How many bags of deck mud do I need?", f"{BASE}/guides/how-many-bags-of-deck-mud-do-i-need", "Estimate dry-pack mortar from square feet, average bed depth and labeled yield."),
+            ("How much floor mud do I need?", f"{BASE}/guides/how-much-floor-mud-do-i-need", "Separate floor-mud quantity from concrete and use the designed average bed thickness."),
+            ("How much mortar do I need for tuckpointing?", f"{BASE}/guides/how-much-mortar-do-i-need-for-tuckpointing", "Use joint length, width, depth, preparation allowance and mortar compatibility."),
+            ("How much concrete do I need for a screed?", f"{BASE}/guides/how-much-concrete-do-i-need-for-a-screed", "Calculate the pour geometry; screeding changes finishing, not the geometric volume."),
+        ],
+        "flooring": [
+            ("How do I calculate marble quantity?", f"{BASE}/guides/how-to-calculate-marble-quantity", "Convert measured area into tile pieces and complete boxes, including layout waste."),
+            ("How many bags of self-leveling underlayment do I need?", f"{BASE}/guides/how-many-bags-of-self-leveling-underlayment-do-i-need", "Use floor area, average depth, waste and the exact product yield."),
+            ("How many tiles do I need?", f"{BASE}/guides/how-many-tiles-do-i-need", "Measure each surface, add layout waste and round pieces and cartons separately."),
+            ("How many flooring boxes do I need?", f"{BASE}/guides/how-many-flooring-boxes-do-i-need", "Use room area, product coverage per carton and a realistic installation allowance."),
+        ],
+        "landscaping": [
+            ("How many bags of gravel do I need?", f"{BASE}/guides/how-many-bags-of-gravel-do-i-need", "Calculate area and depth, then use the selected bag coverage or bulk density."),
+            ("How deep should mulch be?", f"{BASE}/guides/mulch-depth-guide", "Choose a practical installed depth before converting the bed area into bags or cubic yards."),
+            ("How do I calculate soil for a raised bed?", f"{BASE}/guides/how-to-calculate-soil-for-raised-bed", "Use internal bed dimensions and account for settling and the actual soil package volume."),
+        ],
+        "roofing-decks-fences": [
+            ("How do I measure roof area?", f"{BASE}/guides/how-to-measure-roof-area", "Measure roof planes and apply pitch before estimating squares and accessory materials."),
+            ("How many fence posts do I need?", f"{BASE}/guides/how-many-fence-posts-do-i-need", "Use total run, gates, corners, ends and the selected post spacing."),
+            ("How do I calculate deck boards?", f"{BASE}/guides/deck-board-linear-feet-guide", "Convert deck area into rows and linear footage using board width, gap and waste."),
+        ],
+    }
+    question_cards = topic_questions.get(slug, [])
+    intent_html = ""
+    if question_cards:
+        cards = "".join(
+            f'<article class="card"><a href="{url}"><span class="tag">Answer this question</span><h3>{html.escape(question)}</h3><p>{html.escape(summary)}</p></a></article>'
+            for question, url, summary in question_cards
+        )
+        intent_html = f'<article class="article" style="margin:24px 0;background:#eef4f0;border:1px solid #cfe2d7;border-radius:12px"><span class="tag">Questions people ask</span><h2>Start with the answer you need</h2><p>These pages answer a specific planning question first, then connect the explanation to the right calculator and the checks that affect the final purchase.</p><div class="grid">{cards}</div></article>'
     project_cards = "".join(f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Project page</span><h3>{html.escape(title)}</h3><p>Open the RenoMetric resource for this project.</p></a></article>' for item_slug, title in topic["links"])
     related_guides = [g for g in guide_pages if g.get("topic") == slug]
     guide_cards = "".join(f'<article class="card"><a href="{BASE}/guides/{g["slug"]}"><span class="tag">Guide</span><h3>{html.escape(g["title"])}</h3><p>{html.escape(g["description"])}</p></a></article>' for g in related_guides)
@@ -431,7 +464,7 @@ def render_topic(slug: str, topic: dict) -> str:
     offset = len(all_items)
     all_items.extend({"@type": "ListItem", "position": offset + i, "name": g["title"], "url": f"{ORIGIN}/guides/{g['slug']}"} for i, g in enumerate(related_guides, start=1))
     schema = {"@context": "https://schema.org", "@type": "CollectionPage", "name": topic["title"], "description": topic["description"], "url": canonical, "mainEntity": {"@type": "ItemList", "itemListElement": all_items}}
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(topic['title'])} | RenoMetric</title><meta name="description" content="{html.escape(topic['description'])}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><link rel="stylesheet" href="{BASE}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{BASE}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{BASE}/#calculators">Calculators</a><a href="{BASE}/guides/">Guides</a><a href="{BASE}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">Project topic hub</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(topic['title'])}</h1><p>{html.escape(topic['description'])}</p></div></section><section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">Choose a project</span><h2>Calculators and planning pages</h2></div><p>Start with the page closest to the job you are estimating, then use the related working core calculator for the actual numbers.</p></div><div class="grid">{project_cards}</div>{f'<div class="section-head" style="margin-top:42px"><div><span class="tag">Practical guides</span><h2>Measure and plan better.</h2></div></div><div class="grid">{guide_cards}</div>' if guide_cards else ''}<article class="article"><h2>How to use this topic hub</h2><p>Measure the real project first, choose the resource closest to the work you are planning, then replace generic assumptions with exact product coverage, yield, package size or spacing guidance from the supplier. RenoMetric is designed for transparent planning rather than hidden assumptions.</p><p class="note"><b>Planning only:</b> final quantities can change with site conditions, installation method, product specifications and local requirements.</p></article></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Transparent home-improvement planning tools and guides.</p></div></footer></body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(topic['title'])} | RenoMetric</title><meta name="description" content="{html.escape(topic['description'])}"><link rel="canonical" href="{canonical}"><meta name="robots" content="index,follow"><link rel="stylesheet" href="{BASE}/assets/styles.css"><script type="application/ld+json">{json.dumps(schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{BASE}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{BASE}/calculators">Calculators</a><a href="{BASE}/guides/">Guides</a><a href="{BASE}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">Project topic hub</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">{html.escape(topic['title'])}</h1><p>{html.escape(topic['description'])}</p></div></section><section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">Choose a project</span><h2>Calculators and planning pages</h2></div><p>Start with the page closest to the job you are estimating, then use the related working core calculator for the actual numbers.</p></div><div class="grid">{project_cards}</div>{intent_html}{f'<div class="section-head" style="margin-top:42px"><div><span class="tag">Practical guides</span><h2>Measure and plan better.</h2></div></div><div class="grid">{guide_cards}</div>' if guide_cards else ''}<article class="article"><h2>How to use this topic hub</h2><p>Measure the real project first, choose the resource closest to the work you are planning, then replace generic assumptions with exact product coverage, yield, package size or spacing guidance from the supplier. RenoMetric is designed for transparent planning rather than hidden assumptions.</p><p class="note"><b>Planning only:</b> final quantities can change with site conditions, installation method, product specifications and local requirements.</p></article></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Transparent home-improvement planning tools and guides.</p></div></footer></body></html>'''
 
 topics_dir = OUT / "topics"
 topics_dir.mkdir(exist_ok=True)
