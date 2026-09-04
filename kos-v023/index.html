@@ -338,6 +338,71 @@ sensoryMissionHTML=function(id,grade){
   let actions='<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px"><button class="gold" onclick="markSensoryOutcome(\''+key+'\',\'done\')">✅ 我完成了</button><button class="mini" onclick="markSensoryOutcome(\''+key+'\',\'difficult\')">🟡 有点困难</button><button class="mini" onclick="markSensoryOutcome(\''+key+'\',\'skipped\')">⚪ 今天先跳过</button></div><div class="small muted" style="margin-top:6px">本案记录：完成 '+Number(x.done||0)+' 次 · 困难 '+Number(x.difficult||0)+' 次 · 跳过 '+Number(x.skipped||0)+' 次</div></div>';
   return base.replace(/<button class="gold"[^>]*>[\s\S]*?<\/button><\/div>$/,actions);
 };
+const kosCloudRest=cloudRest;
+cloudRest=async function(path,method='GET',body=null,prefer='',attempt=0){
+  if(!auth?.access_token)throw Error('未登录');
+  const headers={apikey:KEY,Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'};
+  if(prefer)headers.Prefer=prefer;
+  const response=await fetch(REST+path,{method,headers,body:body?JSON.stringify(body):undefined});
+  const text=await response.text();
+  let data=null;try{data=text?JSON.parse(text):null}catch(e){data=null}
+  if(response.status===401&&auth?.refresh_token&&attempt===0){await refreshAuth();return cloudRest(path,method,body,prefer,1)}
+  if(!response.ok)throw Error(data?.message||data?.msg||text||'云端请求失败');
+  return data;
+};
+const kosEnsureCloud=ensureCloud;
+ensureCloud=async function(){
+  if(!auth?.user?.id&&auth?.access_token){const u=await fetch(SUPA+'/auth/v1/user',{headers:{apikey:KEY,Authorization:'Bearer '+auth.access_token}});if(u.ok)auth.user=await u.json()}
+  const owner=localStorage.getItem('kos-owner');
+  if(owner&&owner!==auth?.user?.id){st=defaultState();localStorage.setItem('kos-v09',JSON.stringify(st))}
+  const result=await kosEnsureCloud();
+  if(auth?.user?.id)localStorage.setItem('kos-owner',auth.user.id);
+  return result;
+};
+const kosRecommendedLevelForCase=recommendedLevelForCase;
+recommendedLevelForCase=function(caseId,c=activeChild()){
+  let level=kosRecommendedLevelForCase(caseId,c),x=cd(c.id).sensoryOutcomes?.[String(caseId)];
+  if(x&&(Number(x.difficult||0)+Number(x.skipped||0))>0)level=Math.max(1,level-1);
+  return level;
+};
+function standardAnswer(id,v,got,q){return {version:1,caseId:String(id),interactionType:q.type||null,value:got,response:got,choices:Array.isArray(got)?got:(got?.choices||undefined),reason:got?.reason||undefined}}
+function standardAnswerHTML(q){let expected=q.answer??q.answers;if(expected===undefined)return '<div class="small muted">服务器返回标准答案后显示。</div>';let text=Array.isArray(expected)?expected.map(x=>esc(x)).join('、'):esc(expected);return '<div class="call" style="background:#eef7ff;border-left-color:#6c9fc4"><b>📘 标准答案</b><br>'+text+'</div>'}
+const kosSubmitVariant=submitVariant, kosBusyCases=new Set();
+submitVariant=async function(id){
+  if(kosBusyCases.has(id))return;
+  kosBusyCases.add(id);let button=document.querySelector('#fb-'+id)?.previousElementSibling?.querySelector('button.primary');if(button)button.disabled=true;
+  try{let v=variantFor(id);if(!v)return;let q=v.payload?.interaction||{},got=readAnswer(id,v);
+    if(got===null||(Array.isArray(got)&&got.length===0)||(q.type==='number'&&!String($("ans-"+id)?.value||'').trim())||(q.type==='plan'&&(!got.choices||got.choices.length===0))){let fb=$('fb-'+id);if(fb)fb.innerHTML='<div class="call bad"><b>先完成这一步</b><br>请选择或填写你的判断，再提交解决方案。</div>';return}
+    let d=cd(),rec=d.attempts[id]||{count:0,hints:0,level:Number(v.level),startedAt:new Date().toISOString()};rec.count++;rec.level=Number(v.level);d.attempts[id]=rec;let fb=$('fb-'+id),passed=false,engine=null,answer=standardAnswer(id,v,got,q);
+    try{if(auth){let cc=activeChild();if(!cc.remoteId)await syncNormalizedChildren();engine=await cloudRest('rpc/kos_check_case_variant_world','POST',{p_child_id:cc.remoteId,p_case_id:id,p_level:Number(v.level),p_response:answer});passed=!!engine?.passed}else{passed=answerOK(got,q);engine={validator:'local-anonymous',feedback:'试玩模式使用本地判定。',passed}}}
+    catch(e){passed=answerOK(got,q);engine={validator:'fallback',feedback:'云端判定暂不可用，已使用本地兼容判定。',passed};if(!passed&&q.answer===undefined&&q.answers===undefined){passed=true;engine={validator:'local-pending',feedback:'云端判定暂不可用，已记录本次标准答案，稍后同步。',passed}}}
+    if(passed){rec.lastAnswer=answer;rec.hints=Math.max(rec.hints,Math.min(rec.count-1,(v.payload?.hints||[]).length));fb.innerHTML='<div class="call good"><b>✅ 方案成立。</b><br><span class="small">下面是标准答案、解释和原因。</span></div>'+standardAnswerHTML(q)+'<div class="small muted">'+esc(engine?.feedback||'')+'</div>'+npcSuccessHTML(id)+renderAnalysis(v,false)+'<button class="gold" onclick="finalizeCase(\''+id+'\','+Number(v.level)+','+rec.count+','+rec.hints+')">写入城市档案</button>';save()}
+    else{let hints=v.payload?.hints||[],idx=Math.min(rec.count-1,hints.length-1);rec.hints=Math.max(rec.hints,Math.min(rec.count,hints.length));fb.innerHTML=rec.count<=hints.length?'<div class="call bad"><b>还没解决。</b><br>'+esc(engine?.feedback||'')+'<br>提示 '+rec.count+'/'+hints.length+'：'+esc(hints[idx]||'再检查一次证据。')+'</div>':'<div class="call bad"><b>这次先进入完整复盘。</b><br>'+esc(engine?.feedback||'')+'</div>'+standardAnswerHTML(q)+renderAnalysis(v,false);save()}
+  }finally{kosBusyCases.delete(id);if(button)button.disabled=false}
+};
+weeklyHTML=function(){let d=cd(),rows=Object.values(d.caseMeta||{}),days=streakInfo().days.length,attempts=rows.reduce((n,x)=>n+Number(x.attempts||1),0),hints=rows.reduce((n,x)=>n+Number(x.hints||0),0);return '<div class="analysis-card"><h3>📊 参与与完成</h3><p>已完成案件 '+rows.length+' 个 · 尝试 '+attempts+' 次 · 提示 '+hints+' 次 · 累计参与 '+days+' 天。</p></div>'};
+processSummaryHTML=function(){let rows=Object.values(cd().caseMeta||{}),avg=rows.length?Math.round(rows.reduce((n,x)=>n+Number(x.processScore||0),0)/rows.length):0,ind=rows.filter(x=>x.independent).length,attempts=rows.reduce((n,x)=>n+Number(x.attempts||1),0),rate=attempts?Math.round(rows.length/attempts*100):0;return '<div class="analysis-card"><h3>🎯 正确与过程</h3><p>首次通过率 '+(rows.length?rate+'%':'暂无数据')+' · 平均过程分 '+avg+' · 独立完成 '+ind+' 个。</p><div class="small muted">首次通过率按已记录的案件尝试次数计算，错误次数和提示次数会继续保留在错题复盘中。</div></div>'};
+capabilityMapHTML=function(){let p=profileFor(activeChild().id);return '<div class="analysis-card"><h3>🧭 能力建议</h3><p>阅读 '+p.reading+'/3 · 数学 '+p.math+'/3 · 推理 '+p.reasoning+'/3 · 独立解决 '+p.independence+'/3。</p><div class="small muted">建议优先练习当前数值较低的能力轴，并结合感统困难记录降低任务负担。</div></div>'};
+transferHTML=function(){return '<div class="analysis-card"><h3>🏠 家庭实践建议</h3><p>完成案件后，请让孩子用一句话说出证据、原因和办法；感统任务可以完成、记录困难或跳过，不影响案件结果。</p></div>'};
+const kosStoryMountOpenCase=openCase;
+openCase=function(id){
+  kosStoryMountOpenCase(id);
+  const c=cat.cases.find(x=>x.id===id),v=variantFor(id);
+  if(!c||!detail||!modal.classList.contains('on')||detail.querySelector('.case-story-live'))return;
+  const story=document.createElement('div');
+  story.innerHTML=caseStoryHTML(c,v);
+  const work=detail.querySelector('.casework');
+  if(work)work.parentNode.insertBefore(story.firstElementChild,work);
+  else detail.appendChild(story.firstElementChild);
+};
+const kosGradeStoryOpenCase=openCase;
+openCase=function(id){
+  kosGradeStoryOpenCase(id);
+  const c=cat.cases.find(x=>x.id===id),v=variantFor(id),grade=Number(activeChild().grade||3),story=detail?.querySelector('.case-story-live');
+  if(!c||!story)return;
+  if(grade<=2)story.outerHTML=lowGradeStoryHTML(c,v);
+  else if(grade<=4)story.outerHTML=midGradeStoryHTML(c,v);
+};
 touchCheckin();
 boot();
 
