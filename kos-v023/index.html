@@ -338,6 +338,24 @@ sensoryMissionHTML=function(id,grade){
   let actions='<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px"><button class="gold" onclick="markSensoryOutcome(\''+key+'\',\'done\')">✅ 我完成了</button><button class="mini" onclick="markSensoryOutcome(\''+key+'\',\'difficult\')">🟡 有点困难</button><button class="mini" onclick="markSensoryOutcome(\''+key+'\',\'skipped\')">⚪ 今天先跳过</button></div><div class="small muted" style="margin-top:6px">本案记录：完成 '+Number(x.done||0)+' 次 · 困难 '+Number(x.difficult||0)+' 次 · 跳过 '+Number(x.skipped||0)+' 次</div></div>';
   return base.replace(/<button class="gold"[^>]*>[\s\S]*?<\/button><\/div>$/,actions);
 };
+let kosRecoveryMode=false;
+const kosRestoreAuthFromUrl=restoreAuthFromUrl;
+restoreAuthFromUrl=async function(){
+  kosRecoveryMode=/type=recovery/i.test(location.hash);
+  await kosRestoreAuthFromUrl();
+};
+const kosRenderAuth=renderAuth;
+renderAuth=function(){
+  kosRenderAuth();
+  if(!kosRecoveryMode||!authPanel)return;
+  authPanel.innerHTML='<div class="authbox"><b>🔐 设置新密码</b><div class="form" style="margin-top:9px"><label>新密码</label><input id="recoveryPass" type="password" minlength="8" placeholder="至少8位"><label>再次输入</label><input id="recoveryPass2" type="password" minlength="8" placeholder="再次输入新密码"><button class="primary" onclick="updateRecoveryPassword()">保存新密码</button><div id="authMsg" class="authstatus">请设置一个新的登录密码。</div></div></div>';
+};
+async function updateRecoveryPassword(){
+  let a=$('recoveryPass')?.value||'',b=$('recoveryPass2')?.value||'';
+  if(a.length<8)return setAuthMsg('密码至少需要8位。',true);
+  if(a!==b)return setAuthMsg('两次输入的密码不一致。',true);
+  try{setAuthMsg('正在保存新密码…');let r=await fetch(SUPA+'/auth/v1/user',{method:'PUT',headers:{apikey:KEY,Authorization:'Bearer '+auth?.access_token,'Content-Type':'application/json'},body:JSON.stringify({password:a})});let t=await r.text(),data=t?JSON.parse(t):null;if(!r.ok)throw Error(data?.message||data?.msg||t||'密码更新失败');kosRecoveryMode=false;localStorage.setItem('kos-auth',JSON.stringify(auth));setAuthMsg('密码已更新，请继续使用。');renderAuth()}catch(e){setAuthMsg(authError(e),true)}
+}
 const kosCloudRest=cloudRest;
 cloudRest=async function(path,method='GET',body=null,prefer='',attempt=0){
   if(!auth?.access_token)throw Error('未登录');
