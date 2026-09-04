@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rebar Spacing Calculator | Estimate Bar Count | RenoMetric</title>
+<meta name="description" content="Estimate the number of reinforcing bars across a slab width using bar spacing and edge clearance in Imperial or Metric units.">
+<link rel="canonical" href="https://renometric.pages.dev/calculators/rebar-spacing-calculator.html">
+<link rel="stylesheet" href="/assets/styles.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<header class="nav"><div class="wrap nav-in"><a class="brand" href="/">Reno<span>Metric</span></a><nav class="nav-links"><a href="/#calculators">Calculators</a><a href="/methodology.html">Methodology</a><a href="/about.html">About</a></nav></div></header>
+<main>
+<section class="hero"><div class="wrap"><span class="eyebrow">Concrete & Masonry</span><h1 style="font-size:clamp(2.7rem,6vw,5rem)">Rebar Spacing Calculator</h1><p>Estimate the number of reinforcing bars needed across a slab width, with a visible edge allowance.</p></div></section>
+<section class="section"><div class="wrap">
+<div class="calculator-layout">
+<div class="panel"><span class="tag">Project inputs</span><h2 style="margin:6px 0 18px">Enter spacing details</h2>
+<form id="form" class="form-grid">
+<label>Unit system<select id="system"><option value="imperial">Imperial (US)</option><option value="metric">Metric</option></select></label>
+<label id="width-label">Slab width (ft)<input id="width" type="number" min="0.01" step="any" value="12"></label>
+<label id="spacing-label">Bar spacing (in)<input id="spacing" type="number" min="0.01" step="any" value="12"></label>
+<label id="edge-label">Edge clearance (in)<input id="edge" type="number" min="0" step="any" value="3"></label>
+<button class="btn primary" type="submit">Calculate spacing</button>
+</form></div>
+<aside class="result" id="result" aria-live="polite"><div class="kicker">Your estimate</div><div class="big">—</div><div class="sub">Enter project inputs.</div><div class="result-list"></div></aside>
+</div>
+<article class="article"><span class="tag">Transparent formula</span><h2>How the bar count is calculated</h2><p>The calculator subtracts both edge clearances, divides the usable width by the selected spacing, rounds up, and adds one bar for the starting edge.</p><div class="formula">usable width = slab width − 2 × edge clearance<br>bars = ceil(usable width ÷ spacing) + 1</div><p class="note"><b>Planning only:</b> final reinforcement layout, bar size, cover, lap lengths and maximum spacing limits must come from the structural drawings and applicable local requirements.</p><h2>Related tools</h2><p><a href="/calculators/rebar-calculator.html">Rebar Quantity Calculator</a> · <a href="/calculators/rebar-weight-calculator.html">Rebar Weight Calculator</a></p></article>
+</div></section>
+</main>
+<footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Estimates are for planning only.</p></div></footer>
+<script>
+const system=document.getElementById('system');
+const width=document.getElementById('width');
+const spacing=document.getElementById('spacing');
+const edge=document.getElementById('edge');
+const widthLabel=document.getElementById('width-label');
+const spacingLabel=document.getElementById('spacing-label');
+const edgeLabel=document.getElementById('edge-label');
+const result=document.getElementById('result');
+function setMode(){
+  const metric=system.value==='metric';
+  widthLabel.firstChild.textContent=metric?'Slab width (m) ':'Slab width (ft) ';
+  spacingLabel.firstChild.textContent=metric?'Bar spacing (cm) ':'Bar spacing (in) ';
+  edgeLabel.firstChild.textContent=metric?'Edge clearance (cm) ':'Edge clearance (in) ';
+  if(metric){width.value='3.658';spacing.value='30.48';edge.value='7.62'}
+  else{width.value='12';spacing.value='12';edge.value='3'}
+  calculate();
+}
+function calculate(event){
+  if(event)event.preventDefault();
+  const metric=system.value==='metric';
+  const w=Number(width.value);
+  const s=Number(spacing.value);
+  const e=Number(edge.value);
+  if(!(w>0&&s>0&&e>=0)){
+    result.querySelector('.big').textContent='—';
+    result.querySelector('.sub').textContent='Check the inputs.';
+    result.querySelector('.result-list').innerHTML='';
+    return;
+  }
+  const widthIn=metric?w*39.3700787:w*12;
+  const spacingIn=metric?s/2.54:s;
+  const edgeIn=metric?e/2.54:e;
+  const usableIn=Math.max(0,widthIn-2*edgeIn);
+  const bars=Math.ceil(usableIn/spacingIn)+1;
+  const usable=metric?usableIn*2.54/100:usableIn/12;
+  const spacingShown=metric?spacing.value+' cm':spacing.value+' in';
+  const unit=metric?'m':'ft';
+  result.querySelector('.big').textContent=bars+' bars';
+  result.querySelector('.sub').textContent='Planning count at '+spacingShown+' maximum spacing.';
+  result.querySelector('.result-list').innerHTML=[
+    ['Usable width',usable.toFixed(2)+' '+unit],
+    ['Edge clearance',edge.value+' '+(metric?'cm':'in')+' each side'],
+    ['Selected spacing',spacingShown],
+    ['Formula','ceil(usable width ÷ spacing) + 1']
+  ].map(function(row){return '<p><b>'+row[0]+':</b> '+row[1]+'</p>'}).join('');
+}
+system.addEventListener('change',setMode);
+document.getElementById('form').addEventListener('submit',calculate);
+document.getElementById('form').addEventListener('input',calculate);
+calculate();
+</script>
+</body>
+</html>
