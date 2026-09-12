@@ -146,6 +146,8 @@ if renderer:
         for page in module.seo_pages():
             planning_pages.append(page)
             target = calc_dir / f"{page['slug']}.html"
+            if page["slug"] in core_calculator_slugs:
+                continue
             rendered = renderer.render_planning_page(page, BASE, ORIGIN)
             rendered = rendered.replace(
                 '<meta name="robots" content="index,follow">',
@@ -549,7 +551,7 @@ urls.extend(f"{ORIGIN}/topics/{slug}" for slug in TOPICS)
 urls.append(f"{ORIGIN}/calculators")
 urls.append(f"{ORIGIN}/guides")
 urls.extend(f"{ORIGIN}/guides/{g['slug']}" for g in guide_pages if g["slug"] in INDEXABLE_GUIDE_SLUGS)
-urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")) if src.stem in core_calculator_slugs)
+urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")) if src.stem in core_calculator_slugs and 'content="noindex' not in src.read_text(encoding="utf-8", errors="ignore"))
 sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
 sitemap += "\n</urlset>\n"
