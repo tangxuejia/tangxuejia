@@ -18,7 +18,9 @@ if OUT.exists():
 OUT.mkdir(parents=True)
 
 skip_top = {".git", ".github", ".netlify", "_site"}
-skip_files = {"_redirects", "_headers", "netlify.toml"}
+# \`_headers\` must be part of the final Pages publish directory.  Cloudflare
+# parses it there; excluding it here silently falls back to max-age=0.
+skip_files = {"_redirects", "netlify.toml"}
 
 # High-intent pages get a page-specific decision profile instead of only a generic calculator template.
 core_profiles = {
@@ -106,7 +108,7 @@ app = OUT / "assets" / "app.js"
 if app.exists():
     text = app.read_text(encoding="utf-8")
     text = text.replace("https://renometric.netlify.app", ORIGIN)
-    text = text.replace("location.replace('/#calculators')", f"location.replace('{BASE}/calculators')")
+    text = text.replace("location.replace('/#calculators')", f"location.replace('{BASE}/calculators/')")
     text = text.replace('href="/calculators/', f'href="{BASE}/calculators/')
     app.write_text(text, encoding="utf-8")
 
@@ -535,6 +537,24 @@ for page_path in OUT.rglob("*.html"):
         text = text.replace("</head>", f'<link rel="icon" href="{favicon_href}" type="image/svg+xml"></head>', 1)
     page_path.write_text(text, encoding="utf-8")
 
+# Cloudflare Pages treats directory index routes as slash-terminated URLs and
+# responds with a 308 redirect for the slashless form.  Normalize every
+# directory URL in links, canonical tags and JSON-LD so the sitemap and page
+# metadata name the final URL directly.
+directory_paths = {"/calculators", "/guides"}
+directory_paths.update(f"/topics/{slug}" for slug in TOPICS)
+directory_paths.update(f"/guides/{g['slug']}" for g in guide_pages)
+for page_path in OUT.rglob("*.html"):
+    text = page_path.read_text(encoding="utf-8")
+    for path in sorted(directory_paths, key=len, reverse=True):
+        for prefix in ("", BASE):
+            if prefix:
+                route = f"{prefix}{path}"
+            else:
+                route = path
+            text = re.sub(re.escape(route) + r'(?=["\'?#])', route + "/", text)
+    page_path.write_text(text, encoding="utf-8")
+
 # Cloudflare Pages serves the extensionless URLs as the preferred public routes.
 # Keep legacy .html files reachable, but consolidate them with permanent redirects.
 redirects = []
@@ -547,10 +567,10 @@ for slug in ("about", "methodology", "privacy", "terms", "contact"):
 
 urls = [f"{ORIGIN}/"]
 urls.extend(f"{ORIGIN}/{slug}" for slug in ("about", "methodology"))
-urls.extend(f"{ORIGIN}/topics/{slug}" for slug in TOPICS)
-urls.append(f"{ORIGIN}/calculators")
-urls.append(f"{ORIGIN}/guides")
-urls.extend(f"{ORIGIN}/guides/{g['slug']}" for g in guide_pages if g["slug"] in INDEXABLE_GUIDE_SLUGS)
+urls.extend(f"{ORIGIN}/topics/{slug}/" for slug in TOPICS)
+urls.append(f"{ORIGIN}/calculators/")
+urls.append(f"{ORIGIN}/guides/")
+urls.extend(f"{ORIGIN}/guides/{g['slug']}/" for g in guide_pages if g["slug"] in INDEXABLE_GUIDE_SLUGS)
 urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")) if src.stem in core_calculator_slugs and 'content="noindex' not in src.read_text(encoding="utf-8", errors="ignore"))
 sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)

@@ -35,6 +35,8 @@ def route_file(url: str) -> Path | None:
 if not OUT.exists():
     errors.append("_site directory is missing")
 else:
+    if not (OUT / "_headers").is_file():
+        errors.append("_site/_headers is missing; Cloudflare cache rules cannot be applied")
     sitemap = OUT / "sitemap.xml"
     if not sitemap.is_file():
         errors.append("_site/sitemap.xml is missing")
@@ -47,6 +49,10 @@ else:
         public_files = []
         expected_origin = ORIGIN.rstrip("/")
         for url in sitemap_urls:
+            raw_sitemap_path = urlsplit(url).path or "/"
+            sitemap_path = raw_sitemap_path.rstrip("/") or "/"
+            if not raw_sitemap_path.endswith("/") and (sitemap_path in ("/calculators", "/guides") or re.match(r"^/topics/[^/]+$", sitemap_path) or re.match(r"^/guides/[^/]+$", sitemap_path)):
+                errors.append(f"sitemap contains a slashless directory URL: {url}")
             if url.rstrip("/") == expected_origin + "/calculators/index":
                 errors.append("sitemap contains duplicate calculators/index route")
             if not (url == expected_origin or url.startswith(expected_origin + "/")):
