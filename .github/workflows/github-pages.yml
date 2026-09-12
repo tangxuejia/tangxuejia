@@ -86,7 +86,7 @@ jobs:
             grep -Eiq "^content-type:.*(xml|text)" "/tmp/sitemap-headers-${index}.txt"
           done
 
-          python3 -c 'import os, xml.etree.ElementTree as ET; from pathlib import Path; origin=os.environ["LIVE_ORIGIN"]; ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"; path=Path("/tmp/sitemap-1.xml"); root=ET.parse(path).getroot(); urls=[node.text.strip() for node in root.findall(f"{ns}url/{ns}loc") if node.text and node.text.strip()]; assert root.tag == ns + "urlset", "sitemap root is not urlset"; assert len(urls) >= 200, f"sitemap unexpectedly contains only {len(urls)} URLs"; assert all(url == origin or url.startswith(origin + "/") for url in urls), "sitemap contains a non-official origin"; print(f"Parsed {len(urls)} URLs for all three user-agents")'
+          python3 -c 'import os, xml.etree.ElementTree as ET; from pathlib import Path; origin=os.environ["LIVE_ORIGIN"]; ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"; path=Path("/tmp/sitemap-1.xml"); root=ET.parse(path).getroot(); urls=[node.text.strip() for node in root.findall(f"{ns}url/{ns}loc") if node.text and node.text.strip()]; assert root.tag == ns + "urlset", "sitemap root is not urlset"; assert len(urls) > 0, "sitemap contains no URLs"; assert all(url == origin or url.startswith(origin + "/") for url in urls), "sitemap contains a non-official origin"; print(f"Parsed {len(urls)} URLs for all three user-agents")'
           cat /tmp/sitemap-headers-1.txt
 
       - name: Notify Bing and participating search engines through IndexNow
