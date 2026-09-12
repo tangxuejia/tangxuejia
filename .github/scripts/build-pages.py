@@ -110,7 +110,7 @@ if app.exists():
     text = text.replace('href="/calculators/', f'href="{BASE}/calculators/')
     app.write_text(text, encoding="utf-8")
 
-for name in ("robots.txt", "sitemap.xml"):
+for name in ("robots.txt", "sitemap.xml", "sitemap.txt"):
     p = OUT / name
     if p.exists():
         p.write_text(p.read_text(encoding="utf-8").replace("https://renometric.netlify.app", ORIGIN).replace("https://tangxuejia.github.io/tangxuejia", ORIGIN), encoding="utf-8")
@@ -556,6 +556,7 @@ sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sit
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
 sitemap += "\n</urlset>\n"
 (OUT / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+(OUT / "sitemap.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 
 # Keep a flat public index for AI assistants and retrieval systems.
 llms_lines = [
