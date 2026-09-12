@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://renometric.pages.dev/sitemap.xml
+Sitemap: https://renometric.pages.dev/sitemap.txt
