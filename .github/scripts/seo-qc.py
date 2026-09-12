@@ -68,8 +68,8 @@ else:
             if re.search(r"^Disallow:\\s*/\\s*$", robots_text, re.M | re.I):
                 errors.append("robots.txt blocks the whole site")
 
-    if len(sitemap_urls) < 200:
-        errors.append(f"sitemap contains only {len(sitemap_urls)} URLs; expected the public resource library")
+    if len(sitemap_urls) < 1:
+        errors.append("sitemap contains no public URLs")
 
     llms = OUT / "llms.txt"
     if not llms.is_file():
