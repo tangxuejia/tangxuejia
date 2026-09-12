@@ -128,6 +128,12 @@ calc_dir = OUT / "calculators"
 calc_dir.mkdir(exist_ok=True)
 planning_pages: list[dict] = []
 
+# Search index policy: only reviewed guides enter the sitemap. All other
+# generated guides remain directly usable but are noindex until reviewed.
+INDEXABLE_GUIDE_SLUGS = ["how-to-calculate-concrete-yards","concrete-waste-allowance-guide","how-to-measure-room-for-flooring","flooring-waste-percentage-guide","how-many-flooring-boxes-do-i-need","how-to-measure-backsplash-for-tile","tile-waste-percentage-guide","how-to-measure-walls-for-paint","paint-coverage-per-gallon-guide","how-to-calculate-cubic-yards","gravel-depth-guide","mulch-depth-guide","how-to-measure-roof-area","roof-pitch-factor-guide","fence-post-spacing-guide","deck-board-spacing-guide","how-many-bags-of-concrete-do-i-need","how-many-tiles-do-i-need","how-many-bags-of-gravel-do-i-need","how-many-fence-posts-do-i-need","how-to-budget-a-bathroom-remodel","concrete-driveway-thickness-guide","concrete-footing-size-guide","kitchen-backsplash-tile-calculator","room-flooring-square-footage-guide","garden-bed-soil-depth-guide","river-rock-coverage-guide","roof-shingle-waste-guide","deck-material-waste-guide","exterior-paint-coverage-guide","rebar-weight-calculator-guide","steel-weight-calculator-guide","earthwork-volume-calculator-guide","slope-calculator-guide","paver-base-calculator-guide"]
+
+core_calculator_slugs = {src.stem for src in calc_dir.glob("*.html")}
+
 if renderer:
     for idx, seo_script in enumerate(sorted(scripts_dir.glob("seo-pages-v*.py")), start=1):
         spec = importlib.util.spec_from_file_location(f"renometric_seo_batch_{idx}", seo_script)
@@ -140,7 +146,13 @@ if renderer:
         for page in module.seo_pages():
             planning_pages.append(page)
             target = calc_dir / f"{page['slug']}.html"
-            target.write_text(renderer.render_planning_page(page, BASE, ORIGIN), encoding="utf-8")
+            rendered = renderer.render_planning_page(page, BASE, ORIGIN)
+            rendered = rendered.replace(
+                '<meta name="robots" content="index,follow">',
+                '<meta name="robots" content="noindex,follow">',
+                1,
+            )
+            target.write_text(rendered, encoding="utf-8")
 
 for src in list(calc_dir.glob("*.html")):
     slug = src.stem
@@ -273,7 +285,14 @@ if renderer:
             guide_pages.append(page)
             clean = guides_dir / page["slug"]
             clean.mkdir(exist_ok=True)
-            (clean / "index.html").write_text(renderer.render_guide(page, BASE, ORIGIN), encoding="utf-8")
+            rendered = renderer.render_guide(page, BASE, ORIGIN)
+            if page["slug"] not in INDEXABLE_GUIDE_SLUGS:
+                rendered = rendered.replace(
+                    '<meta name="robots" content="index,follow">',
+                    '<meta name="robots" content="noindex,follow">',
+                    1,
+                )
+            (clean / "index.html").write_text(rendered, encoding="utf-8")
 
 for slug in ("about", "methodology", "privacy", "terms", "contact"):
     src = OUT / f"{slug}.html"
@@ -424,6 +443,7 @@ for src in sorted(calc_dir.glob("*.html")):
 
 def render_topic(slug: str, topic: dict) -> str:
     canonical = f"{ORIGIN}/topics/{slug}"
+    topic_links = [(item_slug, title) for item_slug, title in topic["links"] if item_slug in core_calculator_slugs]
     topic_questions = {
         "concrete": [
             ("How much concrete do I need?", f"{BASE}/guides/how-many-bags-of-concrete-do-i-need", "Start with dimensions, thickness, waste and the product or supplier unit."),
@@ -457,10 +477,10 @@ def render_topic(slug: str, topic: dict) -> str:
             for question, url, summary in question_cards
         )
         intent_html = f'<article class="article" style="margin:24px 0;background:#eef4f0;border:1px solid #cfe2d7;border-radius:12px"><span class="tag">Questions people ask</span><h2>Start with the answer you need</h2><p>These pages answer a specific planning question first, then connect the explanation to the right calculator and the checks that affect the final purchase.</p><div class="grid">{cards}</div></article>'
-    project_cards = "".join(f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Project page</span><h3>{html.escape(title)}</h3><p>Open the RenoMetric resource for this project.</p></a></article>' for item_slug, title in topic["links"])
-    related_guides = [g for g in guide_pages if g.get("topic") == slug]
+    project_cards = "".join(f'<article class="card"><a href="{BASE}/calculators/{item_slug}"><span class="tag">Project page</span><h3>{html.escape(title)}</h3><p>Open the RenoMetric resource for this project.</p></a></article>' for item_slug, title in topic_links)
+    related_guides = [g for g in guide_pages if g.get("topic") == slug and g["slug"] in INDEXABLE_GUIDE_SLUGS]
     guide_cards = "".join(f'<article class="card"><a href="{BASE}/guides/{g["slug"]}"><span class="tag">Guide</span><h3>{html.escape(g["title"])}</h3><p>{html.escape(g["description"])}</p></a></article>' for g in related_guides)
-    all_items = [{"@type": "ListItem", "position": i, "name": title, "url": f"{ORIGIN}/calculators/{item_slug}"} for i, (item_slug, title) in enumerate(topic["links"], start=1)]
+    all_items = [{"@type": "ListItem", "position": i, "name": title, "url": f"{ORIGIN}/calculators/{item_slug}"} for i, (item_slug, title) in enumerate(topic_links, start=1)]
     offset = len(all_items)
     all_items.extend({"@type": "ListItem", "position": offset + i, "name": g["title"], "url": f"{ORIGIN}/guides/{g['slug']}"} for i, g in enumerate(related_guides, start=1))
     schema = {"@context": "https://schema.org", "@type": "CollectionPage", "name": topic["title"], "description": topic["description"], "url": canonical, "mainEntity": {"@type": "ItemList", "itemListElement": all_items}}
@@ -473,7 +493,7 @@ for topic_slug, topic in TOPICS.items():
     target.mkdir(exist_ok=True)
     (target / "index.html").write_text(render_topic(topic_slug, topic), encoding="utf-8")
 
-guide_cards = "".join(f'<article class="card"><a href="{BASE}/guides/{g["slug"]}"><span class="tag">{html.escape(g["category"])}</span><h3>{html.escape(g["title"])}</h3><p>{html.escape(g["description"])}</p></a></article>' for g in guide_pages)
+guide_cards = "".join(f'<article class="card"><a href="{BASE}/guides/{g["slug"]}"><span class="tag">{html.escape(g["category"])}</span><h3>{html.escape(g["title"])}</h3><p>{html.escape(g["description"])}</p></a></article>' for g in guide_pages if g["slug"] in INDEXABLE_GUIDE_SLUGS)
 guide_index_schema = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Home Improvement Planning Guides", "description": "Practical measurement, material and estimating guides from RenoMetric.", "url": f"{ORIGIN}/guides"}
 (guides_dir / "index.html").write_text(f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Home Improvement Planning Guides | RenoMetric</title><meta name="description" content="Practical measurement, material and estimating guides for concrete, flooring, paint, landscaping, roofing, decks and fences."><link rel="canonical" href="{ORIGIN}/guides"><meta name="robots" content="index,follow"><link rel="stylesheet" href="{BASE}/assets/styles.css"><script type="application/ld+json">{json.dumps(guide_index_schema, separators=(',', ':'))}</script></head><body><header class="nav"><div class="wrap nav-in"><a class="brand" href="{BASE}/">Reno<span>Metric</span></a><nav class="nav-links"><a href="{BASE}/#calculators">Calculators</a><a href="{BASE}/guides/">Guides</a><a href="{BASE}/methodology.html">Methodology</a></nav></div></header><main><section class="hero"><div class="wrap"><span class="eyebrow">RenoMetric guides</span><h1>Measure better.<br>Estimate with context.</h1><p>Short, practical guides for the assumptions behind common home-improvement material calculations.</p></div></section><section class="section"><div class="wrap"><div class="grid">{guide_cards}</div></div></section></main><footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Planning resources for homeowners and DIY projects.</p></div></footer></body></html>''', encoding="utf-8")
 
@@ -492,7 +512,7 @@ if home.exists():
     marker = '<section class="section"><div class="wrap"><div class="section-head"><div><span class="tag">The RenoMetric standard</span>'
     if marker in text:
         text = text.replace(marker, section + marker, 1)
-    resource_count = len([p for p in calc_dir.glob("*.html") if p.stem != "index"]) + len(guide_pages)
+    resource_count = len(core_calculator_slugs) + len(INDEXABLE_GUIDE_SLUGS)
     text = text.replace('<span><b>10</b> launch tools</span>', f'<span><b>{resource_count}</b> planning resources</span>')
     home.write_text(text, encoding="utf-8")
     if '"@type":"Organization"' not in text:
@@ -524,12 +544,12 @@ for slug in ("about", "methodology", "privacy", "terms", "contact"):
 (OUT / "_redirects").write_text("\n".join(redirects) + "\n", encoding="utf-8")
 
 urls = [f"{ORIGIN}/"]
-urls.extend(f"{ORIGIN}/{slug}" for slug in ("about", "methodology", "privacy", "terms", "contact"))
+urls.extend(f"{ORIGIN}/{slug}" for slug in ("about", "methodology"))
 urls.extend(f"{ORIGIN}/topics/{slug}" for slug in TOPICS)
 urls.append(f"{ORIGIN}/calculators")
 urls.append(f"{ORIGIN}/guides")
-urls.extend(f"{ORIGIN}/guides/{g['slug']}" for g in guide_pages)
-urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")) if src.stem != "index")
+urls.extend(f"{ORIGIN}/guides/{g['slug']}" for g in guide_pages if g["slug"] in INDEXABLE_GUIDE_SLUGS)
+urls.extend(f"{ORIGIN}/calculators/{src.stem}" for src in sorted(calc_dir.glob("*.html")) if src.stem in core_calculator_slugs)
 sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
 sitemap += "\n</urlset>\n"
