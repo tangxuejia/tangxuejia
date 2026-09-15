@@ -1,1 +1,163 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rebar Calculator | Estimate Reinforcement Quantity | RenoMetric</title><meta name="description" content="Estimate rebar length and quantity from slab dimensions, bar spacing, and waste for early concrete reinforcement planning."><link rel="canonical" href="https://tangxuejia.github.io/tangxuejia/calculators/rebar-calculator.html"></head><body><header><a href="/tangxuejia/">RenoMetric</a> · <a href="/tangxuejia/#calculators">Calculators</a></header><main><h1>Rebar Calculator</h1><p>Estimate reinforcement material from project dimensions and planned bar spacing.</p><h2>How it works</h2><p>Enter the area dimensions, choose a planning spacing, and allow for cutting and overlap waste. This produces an approximate material quantity, not a structural design.</p><h2>Formula</h2><p>Number of bars ≈ span ÷ spacing + 1. Total rebar length is then rounded for cuts, overlaps, and purchase lengths.</p><h2>FAQ</h2><h3>Does this replace structural plans?</h3><p>No. Rebar size, spacing, laps, cover, and structural requirements must come from project plans, local requirements, or a qualified professional.</p><h3>Should I include waste?</h3><p>Yes. Cutting and overlap requirements can increase the amount ordered, so keep the allowance editable.</p><p><a href="/tangxuejia/calculators/concrete.html">Concrete Calculator</a> · <a href="/tangxuejia/calculators/concrete-volume-calculator.html">Concrete Volume Calculator</a></p></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rebar Calculator | Quantity, Length & Weight | RenoMetric</title>
+<meta name="description" content="Calculate rebar bar counts, total linear length, stock bars, intersections, and approximate weight for slab reinforcement planning.">
+<link rel="canonical" href="https://renometric.pages.dev/calculators/rebar-calculator.html">
+<link rel="stylesheet" href="/assets/styles.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+.rebar-note{background:#fff7e6;border:1px solid #f1d49a;border-radius:12px;padding:16px;margin-top:20px}
+.rebar-result{background:#eef4f0;border-radius:12px;padding:20px;margin-top:20px}
+.rebar-result .big{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;color:#153d31}
+.rebar-result .sub{color:#476257;margin:6px 0 14px}
+.rebar-result .row{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #cfe0d7;padding:10px 0}
+.rebar-result .row strong{text-align:right}
+@media(max-width:640px){.rebar-result .row{display:block}.rebar-result .row strong{display:block;text-align:left;margin-top:3px}}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap nav-in"><a class="brand" href="/">Reno<span>Metric</span></a><nav class="nav-links"><a href="/#calculators">Calculators</a><a href="/methodology.html">Methodology</a><a href="/about.html">About</a></nav></div></header>
+<main>
+<section class="hero"><div class="wrap">
+<span class="eyebrow">Concrete & Masonry</span>
+<h1 style="font-size:clamp(2.7rem,6vw,5rem)">Rebar Calculator</h1>
+<p>Estimate reinforcement bar quantity, total length, stock bars, intersections, and approximate weight for early slab planning.</p>
+</div></section>
+<section class="section"><div class="wrap">
+<div class="calculator-layout">
+<div class="panel">
+<span class="tag">Project inputs</span>
+<h2 style="margin:6px 0 18px">Enter slab reinforcement details</h2>
+<form id="rebar-form" class="form-grid">
+<label>Unit system<select id="system"><option value="imperial">Imperial (US)</option><option value="metric">Metric</option></select></label>
+<label id="length-label">Slab length (ft)<input id="length" type="number" min="0.01" step="any" value="20"></label>
+<label id="width-label">Slab width (ft)<input id="width" type="number" min="0.01" step="any" value="12"></label>
+<label id="spacing-label">Bar spacing (in)<input id="spacing" type="number" min="0.01" step="any" value="12"></label>
+<label id="edge-label">Edge clearance (in)<input id="edge" type="number" min="0" step="any" value="3"></label>
+<label>Waste / lap allowance (%)<input id="waste" type="number" min="0" step="any" value="10"></label>
+<label id="stock-label">Stock bar length (ft)<input id="stock" type="number" min="0.01" step="any" value="20"></label>
+<label id="size-label">Bar size<select id="size">
+<option value="0.376">US #3</option><option value="0.668">US #4</option><option value="1.043" selected>US #5</option><option value="1.502">US #6</option><option value="2.044">US #7</option><option value="2.670">US #8</option><option value="3.400">US #9</option><option value="4.303">US #10</option><option value="5.313">US #11</option>
+</select></label>
+<button class="btn primary" type="submit">Calculate rebar</button>
+</form>
+</div>
+<aside class="rebar-result" id="result" aria-live="polite">
+<div class="kicker">Your estimate</div>
+<div class="big">—</div>
+<div class="sub">Enter project inputs.</div>
+<div id="result-list"></div>
+</aside>
+</div>
+<div class="rebar-note"><b>Planning only:</b> This tool estimates material quantity from your layout assumptions. It does not select structural bar size, spacing, cover, lap length, hooks, development length, or reinforcement requirements. Follow the project drawings, local code, and a qualified professional.</div>
+<article class="article" style="margin-top:28px">
+<span class="tag">Transparent formula</span>
+<h2>How the rebar estimate works</h2>
+<p>The calculator places one bar grid in each direction. It counts bars across each usable span, adds the editable waste/lap allowance to total linear length, then rounds the result to your stock bar length.</p>
+<div class="formula">bars across = ceil((usable span ÷ spacing)) + 1<br>total length = direction A length + direction B length, then × (1 + allowance)</div>
+<h2>Related tools</h2>
+<p><a href="/calculators/rebar-spacing-calculator/">Rebar Spacing Calculator</a> · <a href="/calculators/rebar-weight-calculator.html">Rebar Weight Calculator</a> · <a href="/calculators/concrete-slab-calculator.html">Concrete Slab Calculator</a></p>
+</article>
+</div></section>
+</main>
+<footer class="footer"><div class="wrap"><p class="legal">© 2026 RenoMetric. Estimates are for planning only. Confirm reinforcement details with the project drawings and a qualified professional.</p></div></footer>
+<script>
+const system=document.getElementById('system');
+const form=document.getElementById('rebar-form');
+const result=document.getElementById('result');
+const resultList=document.getElementById('result-list');
+const lengthInput=document.getElementById('length');
+const widthInput=document.getElementById('width');
+const spacingInput=document.getElementById('spacing');
+const edgeInput=document.getElementById('edge');
+const wasteInput=document.getElementById('waste');
+const stockInput=document.getElementById('stock');
+const sizeSelect=document.getElementById('size');
+const lengthLabel=document.getElementById('length-label');
+const widthLabel=document.getElementById('width-label');
+const spacingLabel=document.getElementById('spacing-label');
+const edgeLabel=document.getElementById('edge-label');
+const stockLabel=document.getElementById('stock-label');
+const sizeLabel=document.getElementById('size-label');
+
+function optionSet(mode){
+  if(mode==='metric'){
+    sizeLabel.firstChild.textContent='Bar diameter ';
+    sizeSelect.innerHTML='<option value="0.222">6 mm</option><option value="0.395">8 mm</option><option value="0.617" selected>10 mm</option><option value="0.889">12 mm</option><option value="1.580">16 mm</option><option value="2.469">20 mm</option><option value="3.858">25 mm</option><option value="6.321">32 mm</option>';
+    lengthInput.value='6.096';
+    widthInput.value='3.658';
+    spacingInput.value='30.48';
+    edgeInput.value='7.62';
+    stockInput.value='6.096';
+  }else{
+    sizeLabel.firstChild.textContent='Bar size ';
+    sizeSelect.innerHTML='<option value="0.376">US #3</option><option value="0.668">US #4</option><option value="1.043" selected>US #5</option><option value="1.502">US #6</option><option value="2.044">US #7</option><option value="2.670">US #8</option><option value="3.400">US #9</option><option value="4.303">US #10</option><option value="5.313">US #11</option>';
+    lengthInput.value='20';
+    widthInput.value='12';
+    spacingInput.value='12';
+    edgeInput.value='3';
+    stockInput.value='20';
+  }
+  lengthLabel.firstChild.textContent=mode==='metric'?'Slab length (m) ':'Slab length (ft) ';
+  widthLabel.firstChild.textContent=mode==='metric'?'Slab width (m) ':'Slab width (ft) ';
+  spacingLabel.firstChild.textContent=mode==='metric'?'Bar spacing (cm) ':'Bar spacing (in) ';
+  edgeLabel.firstChild.textContent=mode==='metric'?'Edge clearance (cm) ':'Edge clearance (in) ';
+  stockLabel.firstChild.textContent=mode==='metric'?'Stock bar length (m) ':'Stock bar length (ft) ';
+  calculate();
+}
+
+function calculate(event){
+  if(event) event.preventDefault();
+  const metric=system.value==='metric';
+  const length=Number(lengthInput.value);
+  const width=Number(widthInput.value);
+  const spacing=Number(spacingInput.value);
+  const edge=Number(edgeInput.value);
+  const waste=Number(wasteInput.value);
+  const stock=Number(stockInput.value);
+  const unitWeight=Number(sizeSelect.value);
+  if(!(length>0&&width>0&&spacing>0&&edge>=0&&waste>=0&&stock>0&&unitWeight>0)){
+    result.querySelector('.big').textContent='—';
+    result.querySelector('.sub').textContent='Check the inputs.';
+    resultList.innerHTML='';
+    return;
+  }
+  const lengthFt=metric?length/0.3048:length;
+  const widthFt=metric?width/0.3048:width;
+  const spacingIn=metric?spacing/2.54:spacing;
+  const edgeIn=metric?edge/2.54:edge;
+  const stockFt=metric?stock/0.3048:stock;
+  const usableLengthIn=Math.max(0,lengthFt*12-2*edgeIn);
+  const usableWidthIn=Math.max(0,widthFt*12-2*edgeIn);
+  const barsAcross=Math.ceil(usableWidthIn/spacingIn)+1;
+  const barsAlong=Math.ceil(usableLengthIn/spacingIn)+1;
+  const rawFeet=(barsAcross*usableLengthIn+barsAlong*usableWidthIn)/12;
+  const totalFeet=rawFeet*(1+waste/100);
+  const stockBars=Math.ceil(totalFeet/stockFt);
+  const intersections=barsAcross*barsAlong;
+  const totalMetricM=totalFeet*0.3048;
+  const weight=metric?totalMetricM*unitWeight:totalFeet*unitWeight;
+  const weightUnit=metric?'kg':'lb';
+  const lengthUnit=metric?'linear m':'linear ft';
+  result.querySelector('.big').textContent=(metric?totalMetricM:totalFeet).toFixed(1)+' '+lengthUnit;
+  result.querySelector('.sub').textContent='Includes '+waste.toFixed(1)+'% for cutting, laps, and purchasing allowance.';
+  resultList.innerHTML=[
+    ['Bars across slab',barsAcross+' bars'],
+    ['Bars along slab',barsAlong+' bars'],
+    ['Grid intersections',intersections.toLocaleString()+''],
+    ['Net bar length', (metric?(rawFeet*0.3048):rawFeet).toFixed(1)+' '+lengthUnit],
+    ['Stock bars to buy',stockBars+' × '+stock+(metric?' m':' ft')],
+    ['Approximate rebar weight',weight.toFixed(1)+' '+weightUnit],
+    ['Layout note','Verify spacing, cover, laps, and bar size from plans']
+  ].map(function(row){return '<div class="row"><span>'+row[0]+'</span><strong>'+row[1]+'</strong></div>'}).join('');
+}
+system.addEventListener('change',function(){optionSet(system.value)});
+form.addEventListener('submit',calculate);
+form.addEventListener('input',calculate);
+calculate();
+</script>
+</body>
+</html>

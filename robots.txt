@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tangxuejia.github.io/tangxuejia/sitemap.xml
+Sitemap: https://renometric.pages.dev/sitemap-main.xml
+Sitemap: https://renometric.pages.dev/sitemap.xml
