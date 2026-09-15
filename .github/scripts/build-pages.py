@@ -576,6 +576,8 @@ sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sit
 sitemap += "\n".join(f"  <url><loc>{url}</loc></url>" for url in urls)
 sitemap += "\n</urlset>\n"
 (OUT / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+# Publish a fresh sitemap filename as a clean re-fetch target for Search Console.
+(OUT / "sitemap-main.xml").write_text(sitemap, encoding="utf-8")
 (OUT / "sitemap.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 
 # Keep a flat public index for AI assistants and retrieval systems.
